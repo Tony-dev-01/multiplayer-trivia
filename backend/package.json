@@ -1,0 +1,24 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "multiplayer trivia",
+  "main": "server.js",
+  "repository": {
+    "url": "https://github.com/Tony-dev-01/multiplayer-trivia.git",
+    "type": "git"
+  },
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "author": "Antoine Lafontaine",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.9",
+    "short-unique-id": "^5.2.0",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.0.3"
+  }
+}
