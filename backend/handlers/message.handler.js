@@ -1,10 +1,10 @@
 
 
 module.exports = (io) => {
-    const sendMessage = function (gameRoomId, message) {
+    const sendMessage = function (gameRoomId, message, userId) {
         const socket = this;
-        console.log(message);
-        socket.to(gameRoomId).emit('receive-message', message);
+        console.log(userId);
+        socket.to(gameRoomId).emit('receive-message', message, userId);
     };
 
     return{

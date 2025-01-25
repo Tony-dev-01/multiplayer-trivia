@@ -1,28 +1,39 @@
+const { all } = require("../server");
 
 
 module.exports = (io) => {
-    const createRoom = function (callback) {
-        callback({
-            status: 'ok',
-            gameRoomId: shortUUID
-        })
-    };
 
-    const joinRoom = function (gameRoomId, callback) {
+    const joinRoom = async function (gameRoomId, callback) {
         const socket = this;
+        // const roomUsers = [];
 
-        socket.join(gameRoomId);
-        console.log(socket.id + ' joined room ' + gameRoomId)
-        socket.to(gameRoomId).emit('user-connected', socket.id);
+        socket.join(gameRoomId); // join the room lobby
+
+        const sockets = await io.in(gameRoomId).fetchSockets();
+
+        const roomUsers = sockets.map(socket => {
+            return {
+                roomUserId: socket.id,
+                username: socket.username,
+                role: socket.role
+            };
+        })
+        
+        socket.to(gameRoomId).emit('user-connected', roomUsers);
+        
         callback({
             status: 'ok',
-            message: 'You joined the room.'
+            message: 'You joined the room.',
+            roomUsers
         })
+        
+        console.log(socket.id + ' joined room ' + gameRoomId)
+        
+        
     };
 
     return {
         joinRoom, 
-        createRoom
     }
 
 };
