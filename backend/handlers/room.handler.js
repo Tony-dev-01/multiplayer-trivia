@@ -3,7 +3,7 @@ const { all } = require("../server");
 
 module.exports = (io) => {
 
-    const joinRoom = async function (gameRoomId, callback) {
+    const joinRoom = async function (gameRoomId, username, callback) {
         const socket = this;
         // const roomUsers = [];
 
@@ -19,7 +19,7 @@ module.exports = (io) => {
             };
         })
         
-        socket.to(gameRoomId).emit('user-connected', roomUsers);
+        socket.to(gameRoomId).emit('user-connected', username, roomUsers);
         
         callback({
             status: 'ok',

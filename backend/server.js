@@ -67,36 +67,25 @@ app.get('/:gameRoomId', (req, res) => {
     res.json({status: 200, data: {roomId: req.params.gameRoomId}});
 });
 
-
-// io.use(authentication(socket, next));
 io.use((socket, next) => {
     const username = socket.handshake.auth.username;
     const role = socket.handshake.auth.role;
     if (!username) {
-            return next(new Error("invalid username"));
-        }
-        socket.username = username;
-        socket.role = role;
-        next();
+        return next(new Error("invalid username"));
+    }
+    socket.username = username;
+    socket.role = role;
+    next();
 });
 
 
 io.on('connection', (socket) => {
-    // const roomUsers = [];
-    // for (let [id, socket] of io.of("/").sockets) {
-    //     roomUsers.push({
-    //     roomUserID: id,
-    //     username: socket.username,
-    //     });
-    // };
-
-    // socket.emit("room-users", roomUsers);
-    
     socket.on('join-room', joinRoom);
     socket.on('send-message', sendMessage);
     
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (gameRoomId, username) => {
         console.log('A user disconnected');
+        socket.to(gameRoomId).emit('user-disconnected', username)
     });
     
     socket.onAny((event, ...args) => {
@@ -104,29 +93,6 @@ io.on('connection', (socket) => {
     });
 });
         
-        
-        // io.use(function(socket, next){
-            //     if (socket.handshake.query && socket.handshake.query.token){
-                //         jwt.verify(socket.handshake.query.token, 'SECRET_KEY', function(err, decoded) {
-                    //             if (err) return next(new Error('Authentication error'));
-                    //             socket.decoded = decoded;
-                    //             next();
-//         });
-//         }
-//         else {
-//         next(new Error('Authentication error'));
-//         }    
-//     })
-//     .on('connection', function(socket) {
-//       // Connection now authenticated to receive further events
-
-//     socket.on('join-room', joinRoom);
-//     socket.on('send-message', sendMessage);
-
-//     socket.on('disconnect', () => {
-//         console.log('A user disconnected');
-//     });
-//     });
 
 
 

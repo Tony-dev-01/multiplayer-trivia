@@ -1,10 +1,32 @@
+const { RateLimiterMemory } = require('rate-limiter-flexible');
 
 
 module.exports = (io) => {
-    const sendMessage = function (gameRoomId, message, userId) {
-        const socket = this;
-        console.log(userId);
-        socket.to(gameRoomId).emit('receive-message', message, userId);
+    const rateLimiter = new RateLimiterMemory(
+    {
+        points: 1, // 5 points
+        duration: 10, // per 10 seconds
+    });
+    
+    const sendMessage = async function (gameRoomId, message, username, callback) {
+        try{
+            const socket = this;
+            console.log(username)
+            await rateLimiter.consume(socket.handshake.address);
+            socket.to(gameRoomId).emit('receive-message', message, username);
+            callback({
+                status: 'OK',
+                message,
+                username
+            });
+        } catch(err){
+            callback({
+                status: 'ERROR',
+                message: 'Too many messages.',
+                timeRemaining: err.msBeforeNext
+            })
+            console.log('too many messages');
+        }
     };
 
     return{
