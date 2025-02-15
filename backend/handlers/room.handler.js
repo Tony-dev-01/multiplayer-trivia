@@ -1,6 +1,3 @@
-const { all } = require("../server");
-
-
 module.exports = (io) => {
 
     const joinRoom = async function (gameRoomId, username, callback) {
@@ -12,6 +9,7 @@ module.exports = (io) => {
         const sockets = await io.in(gameRoomId).fetchSockets();
 
         const roomUsers = sockets.map(socket => {
+            console.log(socket.role)
             return {
                 roomUserId: socket.id,
                 username: socket.username,
@@ -28,12 +26,32 @@ module.exports = (io) => {
         })
         
         console.log(socket.id + ' joined room ' + gameRoomId)
-        
-        
+    };
+
+
+    const userInGame = async (gameRoomId, callback) => {
+        const sockets = await io.in(gameRoomId).fetchSockets();
+
+        const roomUsers = sockets.map(socket => {
+            console.log(socket.role)
+            return {
+                roomUserId: socket.id,
+                username: socket.username,
+                role: socket.role
+            };
+        })
+
+        console.log('call received')
+
+        callback({
+            status: 'OK',
+            roomUsers
+        })
     };
 
     return {
         joinRoom, 
+        userInGame
     }
 
 };

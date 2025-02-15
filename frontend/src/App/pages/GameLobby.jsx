@@ -1,11 +1,13 @@
 import { useEffect, useState, } from "react";
 import { socket } from "../../config/socket";
-import {  useParams } from "react-router-dom";
+import {  useNavigate, useParams } from "react-router-dom";
 import { createPortal } from 'react-dom';
 import Toast from "../../components/Toast";
 import Chat from "../../components/Chat";
 import UserListElement from "../../components/UserListElement";
 import UsernameForm from "../../components/UsernameForm";
+import Dropdown from "../../components/Dropdown";
+import AlertMessage from "../../components/AlertMessage";
 
 const GameLobby = () => {
     const params = useParams();
@@ -16,6 +18,10 @@ const GameLobby = () => {
     const [openToast, setOpenToast] = useState(false);
     const [usernameSelected, setUsernameSelected] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const [gameSettings, setGameSettings] = useState({});
+    const [errorMessage, setErrorMessage] = useState(undefined);
+    const navigate = useNavigate();
+    // const response = UseFetchApi('/game');
 
     // const toastEventType = newUserJoining ? 'User joined' : 'User disconnected';
     // const toastMessage =  newUserJoining === sessionStorage.username ? 'You joined the room.' : newUserJoining + ' joined the room.'
@@ -31,6 +37,26 @@ const GameLobby = () => {
         setIsConnected(() => true);
     };
 
+    const handleSelection = (e) => {
+        const setting = e.target.id.toLowerCase();
+        const value = e.target.value.replaceAll(" ", '_').toLowerCase();
+
+        const newSettings = {...gameSettings, [setting]: value}
+        setGameSettings(() => newSettings)
+    };
+
+    const handleStartGame = async (e) => {
+        e.preventDefault()
+        if (Object.keys(gameSettings).length === 3 && !Object.values(gameSettings).includes('-')) {
+            setErrorMessage(() => undefined)
+            console.log('game starting...')
+            socket.timeout(10000).emit('start-game', gameRoomId, username, gameSettings.category, gameSettings.difficulty, gameSettings.questions);
+        } else {
+            setErrorMessage(() => 'Please select game options.')
+        }
+
+    }
+
     
     useEffect(() => {
         // grab existing username from session storage on load
@@ -42,9 +68,10 @@ const GameLobby = () => {
             setIsConnected(() => true);
         }
 
-        return () => {
-            socket.disconnect(gameRoomId, sessionStorage.getItem('username'));
-        }
+        // Disconnect any users that are leaving the page
+        // return () => {
+        //     socket.disconnect(gameRoomId, sessionStorage.getItem('username'));
+        // }
     }, [])
 
     // Display toast when new user joins
@@ -61,11 +88,6 @@ const GameLobby = () => {
 
 
     useEffect(() => {
-        // get list of room users when there's a new connection
-        // socket.on('room-users', (updatedRoomUsers) => {
-        //     setRoomUsers(() => updatedRoomUsers);
-        // });
-
         socket.on("connect_error", (err) => {
             if (err.message === "invalid username") {
                 setUsernameSelected(() => false);
@@ -85,11 +107,16 @@ const GameLobby = () => {
             setOpenToast(() => true);
         });
 
+        socket.on('starting-game', gameURL => {
+            navigate(`${gameURL}`);
+        })
+
         return () => {
             // cleanup listeners
             socket.off('user-connected');
             socket.off('connect_error');
             socket.off('user-disconnected');
+            socket.off('starting-game');
         }
     }, [socket]);
 
@@ -97,7 +124,7 @@ const GameLobby = () => {
         // join room on connection
         if (isConnected){
             socket.timeout(10000).emit('join-room', gameRoomId, username, (error, callback) => {
-            setRoomUsers(() => callback.roomUsers); // Get initial list of room users when joining a room
+            setRoomUsers(() => callback.roomUsers || []); // Get initial list of room users when joining a room
             });
         };
     }, [isConnected])
@@ -114,14 +141,27 @@ const GameLobby = () => {
 
             <h1 className="font-2xl">Welcome to your game lobby!</h1>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8">
-                <div className="h-32 rounded-lg bg-gray-700 lg:col-span-2 p-6">
-                    {/* Lobby info displayed here */}
-                    <ul>
-                        {roomUsers && roomUsers.map((user) => {
-                            return <UserListElement key={user.username}>{user.username}</UserListElement>
-                        })}
-                    </ul>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8 h-full">
+                <div className="h-full rounded-lg bg-gray-700 lg:col-span-2 p-6">
+                    <div className="flex flex-row gap-6">
+                        {/* Users connected to lobby */}
+                        <ul className="flex flex-col gap-3">
+                            {roomUsers && roomUsers.map((user) => {
+                                return <UserListElement key={user.username} user={user}/>
+                            })}
+                        </ul>
+                        <form className="flex flex-col gap-4" onSubmit={handleStartGame}>
+                        <div className="flex flex-row gap-4">
+                            <Dropdown name="category" id="category" onSelection={handleSelection} options={["random", "music", "sport and leisure", "film and tv", "arts and literature", "history", "society and culture", "science", "geography", "food and drink", "general knowledge"]}>Category</Dropdown>
+                            <Dropdown name="difficulty" id="difficulty" onSelection={handleSelection} options={['Easy', 'Medium', 'Hard']}>Difficulty</Dropdown>
+                            <Dropdown name="questions" id="questions" onSelection={handleSelection} options={['10', '15', '20', '25']}>Number of questions</Dropdown>
+                        </div>
+                        <div>
+                        <button type="submit" className="btn btn-primary">Start game</button>
+                        {errorMessage && <AlertMessage type='warning'>{errorMessage}</AlertMessage>}
+                        </div>
+                        </form>
+                    </div>
                 </div>
                 <div className="h-96 max-h-96 rounded-lg bg-gray-700 p-6">
                     {/* Chat display here */}
