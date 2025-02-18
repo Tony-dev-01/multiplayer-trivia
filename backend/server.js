@@ -21,7 +21,7 @@ const {authentication} = require('./middlewares/auth.middleware.js');
 // const routes = require('./routes');
 
 // Controllers
-const {fetchQuestion} = require('./controllers/game.controller.js');
+const {postScore} = require('./controllers/game.controller.js');
 
 const shortUUID = new ShortUniqueId({dictionary: 'number', length: 10}).dict.join('');
 const httpServer = http.createServer(app);
@@ -40,7 +40,7 @@ const io = new Server(
 // socket handlers
 const {sendMessage} = require('./handlers/message.handler.js')(io);
 const {joinRoom, userInGame} = require('./handlers/room.handler.js')(io);
-const {startGame} = require('./handlers/game.handler.js')(io);
+const {startGame, getQuestionResults} = require('./handlers/game.handler.js')(io);
 
 // data
 let activeRooms = []; // store in mongo database later
@@ -66,7 +66,17 @@ app.get('/:gameRoomId', (req, res) => {
     res.json({status: 200, data: {roomId: req.params.gameRoomId}});
 });
 
-app.get('/:gameRoomId/game', fetchQuestion);
+app.post('/:gameRoomId', postScore);
+
+// Catch all endpoint
+app.get('*', (req, res) => {
+    res.status(404).json({
+        status: 404,
+        message: 'This is a catch all. Wrong endpoint. Verify if you are using a valid endpoint.' 
+    });
+})
+
+// Web socket
 
 io.use((socket, next) => {
     const username = socket.handshake.auth.username;
@@ -85,6 +95,7 @@ io.on('connection', (socket) => {
     socket.on('send-message', sendMessage);
     socket.on('user-in-game', userInGame);
     socket.on('start-game', startGame);
+    socket.on('send-answer', getQuestionResults)
     
     socket.on('disconnect', (gameRoomId, username) => {
         console.log('A user disconnected');

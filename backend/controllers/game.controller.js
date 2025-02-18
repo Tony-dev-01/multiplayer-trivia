@@ -1,16 +1,24 @@
+const { MongoClient } = require('mongodb');
 
-const fetchQuestion = async (req, res) => {   
-    console.log(req);
+const {database} = require('../config/app.config');
+
+const postScore = async (req, res) => {  
+    const client = new MongoClient(database.MONGO_URI, database.options);
     try {
-        const request = await fetch(`https://the-trivia-api.com/v2/questions?categories=${req.categories}&&difficulties=${req.difficulties}`);
-        const data = await request.json();
-        return {status: 200, data: data};
-    } catch(err){
-        return {status: 401, message: err.message};
-    }
+        client.connect();
 
+        const db = client.db("trivia-multiplayer");
+
+        const results = await db.collection('scores').insertOne({key: 'test'});
+
+        if (results.acknowledged){
+            res.status(201).json({status: 201, message: 'Successful'});
+        };
+    } catch(err){
+        res.status(404).json({status: 404, data: {}, message: err.message})
+    }
 };
 
 module.exports = {
-    fetchQuestion
+    postScore
 }

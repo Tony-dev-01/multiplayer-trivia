@@ -13,9 +13,11 @@
   "author": "Antoine Lafontaine",
   "license": "MIT",
   "dependencies": {
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.13.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.9",
     "rate-limiter-flexible": "^5.0.5",

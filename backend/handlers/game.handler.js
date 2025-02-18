@@ -28,8 +28,21 @@ module.exports = (io) => {
         const questions = await request.json();
         console.log(questions);
 
+        // broadcast questions to the room
+        const initialDelay = setTimeout(() => {
+            // send initial question
+            clearTimeout(initialDelay);
+            const currentQuestion = questions[questionsRemaining];
+            const answers = shuffleAnswers([currentQuestion.correctAnswer, ...currentQuestion.incorrectAnswers])
+            const refactoredQuestionObject = {
+                id: currentQuestion.id,
+                answers,
+                question: currentQuestion.question
+            };
+            io.sockets.to(gameRoomId).emit('receive-question', refactoredQuestionObject);
+            questionsRemaining--;
 
-        // fetch question every 30 seconds
+        // send a question every 25 seconds
         const questionFetchInterval = setInterval(() => {
             if (questionsRemaining >= 0){
                 const currentQuestion = questions[questionsRemaining];
@@ -45,14 +58,18 @@ module.exports = (io) => {
                 // game finished
                 clearInterval(questionFetchInterval);
             }
-        }, 5000);
+        }, 25000);
 
-
-
-        // broadcast questions to the room
+    }, 5000);
     };
+
+    const getQuestionResults = async function () {
+
+    };
+
     
     return{
-        startGame
+        startGame,
+        getQuestionResults
     }
 }
