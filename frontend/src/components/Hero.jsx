@@ -5,18 +5,22 @@ import { useNavigate } from "react-router-dom";
 const Hero = () => {
   const navigate = useNavigate();
 
-  const handleCreateGame = () => {
+  const handleCreateGame = async () => {
     // send get request to server
-    fetch('http://localhost:4000/create-room', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
+
+    try{
+      const request = await fetch('http://localhost:4000/')
+      const response = await request.json();
+      
+      if (response.status === 201){
+        navigate(`/${response.data.gameRoomId}`); // navigate user to their new room
+      } else {
+        throw new Error(response.message);
       }
-    })
-    .then ((response) => response.json())
-    .then((data) => {
-      navigate(`/${data.data.gameRoomId}`); // navigate user to their new room
-    })
+      
+    } catch (err){
+      console.log(err.message);
+    }
   };
 
     return(

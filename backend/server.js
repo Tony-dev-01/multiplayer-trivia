@@ -21,7 +21,7 @@ const {authentication} = require('./middlewares/auth.middleware.js');
 // const routes = require('./routes');
 
 // Controllers
-const {postScore} = require('./controllers/game.controller.js');
+const {updateScore, createRoom, addNewUser, verifyRoomExists} = require('./controllers/game.controller.js');
 
 const shortUUID = new ShortUniqueId({dictionary: 'number', length: 10}).dict.join('');
 const httpServer = http.createServer(app);
@@ -42,9 +42,6 @@ const {sendMessage} = require('./handlers/message.handler.js')(io);
 const {joinRoom, userInGame} = require('./handlers/room.handler.js')(io);
 const {startGame, getQuestionResults} = require('./handlers/game.handler.js')(io);
 
-// data
-let activeRooms = []; // store in mongo database later
-
 // Server setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -56,17 +53,11 @@ app.use(cors({
 }));
 app.use(rateLimiter);
 
-app.get('/create-room', (req, res) => {
-    res.send({status: 200, data: {gameRoomId: shortUUID}});
-});
+app.get('/', createRoom);
 
-app.get('/:gameRoomId', (req, res) => {
-    // check if room is active, otherwise redirect or throw error
-    console.log('user logging into the room')
-    res.json({status: 200, data: {roomId: req.params.gameRoomId}});
-});
-
-app.post('/:gameRoomId', postScore);
+app.get('/:gameRoomId', verifyRoomExists);
+app.put('/:gameRoomId', updateScore);
+app.put('/:gameRoomId/user', addNewUser);
 
 // Catch all endpoint
 app.get('*', (req, res) => {

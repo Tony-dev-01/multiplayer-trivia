@@ -35,7 +35,7 @@ const Game = () => {
         // backend calculates the score and stores it in DB
         try {
             const request = await fetch('http://localhost:4000/:gameRoomId', {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
                     'Content-type': 'application/json'
@@ -45,7 +45,7 @@ const Game = () => {
 
             const response = await request.json();
 
-            if (response.status === 201){
+            if (response.status === 204){
                 // request successful
             }
         } catch(err) {
@@ -59,7 +59,6 @@ const Game = () => {
         console.log(e.target.value);
         setSelectedAnswer(() => ({gameRoomId, answer: e.target.value, timeRemaining: 10}));
         verifyAnswer();
-        // dispatchEvent(new Event('submit'));
     };
 
     const handleTimeout = () => {
