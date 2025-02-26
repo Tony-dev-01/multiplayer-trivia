@@ -11,18 +11,24 @@ const Game = () => {
     const difficulties = searchParams.get('difficulties');
     const [currentQuestion, setCurrentQuestion] = useState({});
     const [selectedAnswer, setSelectedAnswer] = useState(undefined);
+    const [currentScore, setCurrentScore] = useState(0);
+    const [timer, setTimer] = useState(false);
+    const [timeRemaining, setTimeRemaining] = useState(0);
 
     const gameHasStarted = Object.values(currentQuestion).length > 0;
+    const username = sessionStorage.getItem('username');
 
     useEffect(() => {
         socket.on('receive-question', (question) => {
             setCurrentQuestion(() => question);
             setSelectedAnswer(() => '');
+            setTimer(() => true)
             console.log(question);
         });
 
         socket.on('score-update', (score) => {
             // display scoreboard
+            setCurrentScore(score);
         });
 
         return () => {
@@ -34,44 +40,49 @@ const Game = () => {
         // send answer to backend
         // backend calculates the score and stores it in DB
         try {
-            const request = await fetch('http://localhost:4000/:gameRoomId', {
+            const request = await fetch(`http://localhost:4000/${gameRoomId}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
                     'Content-type': 'application/json'
                 },
-                body: JSON.stringify(selectedAnswer)
+                body: JSON.stringify({gameRoomId, username, answer: {...selectedAnswer}})
             });
 
-            const response = await request.json();
+            const response = await request;
 
             if (response.status === 204){
                 // request successful
+                console.log('answer submitted')
+            } else {
+                throw new Error(response.message)
             }
         } catch(err) {
-            console.log(err);
+            console.log(err.message);
         }
-    }
-
+    };
 
     const handleAnswer = (e) => {
         e.preventDefault();
-        console.log(e.target.value);
-        setSelectedAnswer(() => ({gameRoomId, answer: e.target.value, timeRemaining: 10}));
+        setSelectedAnswer(() => ({answer: e.target.value, timeRemaining, questionId: currentQuestion.id}));
         verifyAnswer();
     };
 
     const handleTimeout = () => {
         console.log('time ran out.');
+        setSelectedAnswer(() => undefined);
         // send selectedAnswer to server 
-        socket.timeout(10000).emit('send-answer', selectedAnswer);
+        verifyAnswer();
+        setTimer(() => false);
     }
 
     return(
         <div className="w-[80vw] h-[100vh] m-auto py-16 flex flex-col justify-center items-center">
             {gameHasStarted ? 
             <>
-            <Countdown counterLength={5} reset={setCurrentQuestion} onTimeout={handleTimeout}/>
+            {timer &&
+                <Countdown counterLength={10} onTimeout={handleTimeout} selectedAnswer={selectedAnswer} setTimeRemaining={setTimeRemaining}/>
+            }
             <form className="flex flex-col gap-4 w-full h-full" onClick={handleAnswer}>
             <h2 className="text-2xl font-bold">{currentQuestion.question.text}</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-4 gap-4">

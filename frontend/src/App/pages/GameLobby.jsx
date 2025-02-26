@@ -26,15 +26,32 @@ const GameLobby = () => {
     // const toastEventType = newUserJoining ? 'User joined' : 'User disconnected';
     // const toastMessage =  newUserJoining === sessionStorage.username ? 'You joined the room.' : newUserJoining + ' joined the room.'
     
-    const onUsernameSelection = (e, username) => {
+    const onUsernameSelection = async (e, username) => {
         e.preventDefault();
         const role = 'subscriber';
         sessionStorage.setItem('username', username); // store username in session storage 
         sessionStorage.setItem('role', role); // store role in session storage 
-        setUsernameSelected(() => true);
-        socket.auth = { username, role };
-        socket.connect();
-        setIsConnected(() => true);
+        
+        try {
+            const request = await fetch(`http://localhost:4000/${gameRoomId}/user`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({gameRoomId, username})
+            });
+
+            const response = await request.json();
+
+            console.log(response);
+            socket.auth = { username };
+            socket.connect();
+            setUsernameSelected(() => true);
+            setIsConnected(() => true);
+        } catch(err){
+            console.log(err.message)
+        }
     };
 
     const handleSelection = (e) => {
@@ -54,19 +71,41 @@ const GameLobby = () => {
         } else {
             setErrorMessage(() => 'Please select game options.')
         }
-
-    }
+    };
 
     
     useEffect(() => {
-        // grab existing username from session storage on load
-        if (sessionStorage.getItem('username')){
-            const username = sessionStorage.getItem('username')
-            setUsernameSelected(() => true);
-            socket.auth = { username };
-            socket.connect();
-            setIsConnected(() => true);
+        const createNewUser = async () => {
+            try {
+                // grab existing username from session storage on load
+                if (sessionStorage.getItem('username')){
+                    const username = sessionStorage.getItem('username')
+                    setUsernameSelected(() => true);
+
+                    // const request = await fetch(`http://localhost:4000/${gameRoomId}/user`, {
+                    //     method: 'PUT',
+                    //     headers: {
+                    //         'Accept': 'application/json',
+                    //         'Content-type': 'application/json'
+                    //     },
+                    //     body: JSON.stringify({gameRoomId, username})
+                    // });
+
+                    // const response = await request.json();
+
+
+                    socket.auth = { username };
+                    socket.connect();
+                    setIsConnected(() => true);
+                } else {
+                    return;
+                }
+            } catch(err){
+                console.log(err.message)
+            }
         }
+
+        createNewUser();
 
         // Disconnect any users that are leaving the page
         // return () => {

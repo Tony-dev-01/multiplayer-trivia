@@ -10,21 +10,22 @@ const validateAnswer = (userAnswer) => {
     // Check if answer is correct and calculate points
     // return the score
     const newScore = userAnswer.currentScore + 15;
-    return newScore;
+    return 15;
 }
 
 const updateScore = async (req, res) => {  
     const client = new MongoClient(database.MONGO_URI, database.options);
 
-    const gameRoomId = req.body.gameRoomId;
+    const gameRoomId = Number(req.params.gameRoomId);
     const username = req.body.username;
+    const answer = req.body.answer;
 
     try {
         client.connect();
 
         const db = client.db("trivia-multiplayer");
 
-        const newScore = validateAnswer(req.body.answer);
+        const newScore = validateAnswer(answer);
 
         const results = await db.collection('rooms').updateOne({_id: gameRoomId}, {'$set': {[`users.${username}.score`]: newScore}});
 
@@ -67,7 +68,7 @@ const createRoom = async (req, res) => {
 const addNewUser = async(req, res) => {
     const client = new MongoClient(database.MONGO_URI, database.options);
 
-    const gameRoomId = req.body.gameRoomId;
+    const gameRoomId = Number(req.params.gameRoomId);
     const username = req.body.username.length > 0 ? req.body.username : undefined;
 
     const user = { username, "score": 0, "numWrongAnswers": 0, "numCorrectAnswers": 0}
@@ -80,7 +81,10 @@ const addNewUser = async(req, res) => {
         if (username){
             const createNewUser = await db.collection('rooms').updateOne({_id: gameRoomId}, {'$set': {[`users.${username}`]: user}});
 
+            console.log(createNewUser)
+
             if (createNewUser.acknowledged){
+                console.log('new user')
                 res.status(201).json({status: 201, message: 'Successful'});
             };
         } else {

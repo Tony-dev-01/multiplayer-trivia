@@ -1,8 +1,8 @@
+
 module.exports = (io) => {
 
     const joinRoom = async function (gameRoomId, username, callback) {
         const socket = this;
-        // const roomUsers = [];
 
         socket.join(gameRoomId); // join the room lobby
 

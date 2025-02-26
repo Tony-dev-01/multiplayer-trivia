@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 
-const Countdown = ({counterLength, reset, onTimeout}) => {
+const Countdown = ({counterLength, onTimeout, selectedAnswer, setTimeRemaining}) => {
     const [counter, setCounter] = useState(counterLength);
     const [timeOut, setTimeOut] = useState(false);
 
@@ -10,6 +10,9 @@ const Countdown = ({counterLength, reset, onTimeout}) => {
             if (timeOut){
                 clearInterval(timer);
                 onTimeout()
+            } else if (selectedAnswer !== ''){
+                setTimeRemaining(counter);
+                clearTimeout();
             } else {
                 setCounter(timeRemaining => timeRemaining - 1)
             }
@@ -18,7 +21,7 @@ const Countdown = ({counterLength, reset, onTimeout}) => {
         return () => {
             clearInterval(timer);
         }
-    }, [reset])
+    }, [])
 
     return(
         <span className="countdown font-mono text-6xl">

@@ -48,7 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
 app.use(cors({
     origin: clientPort,
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT"],
     credentials: true,
 }));
 app.use(rateLimiter);
