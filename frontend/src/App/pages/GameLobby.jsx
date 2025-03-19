@@ -20,6 +20,8 @@ const GameLobby = () => {
     const [toastMessage, setToastMessage] = useState('');
     const [gameSettings, setGameSettings] = useState({});
     const [errorMessage, setErrorMessage] = useState(undefined);
+    const [gameIsStarting, setGameIsStarting] = useState(false);
+    const isHost = roomUsers[0].username === username;
     const navigate = useNavigate();
     // const response = UseFetchApi('/game');
 
@@ -146,16 +148,26 @@ const GameLobby = () => {
             setOpenToast(() => true);
         });
 
-        socket.on('starting-game', gameURL => {
-            navigate(`${gameURL}`);
-        })
+        socket.on('start-countdown', (countdown, gameURL) => {
+            setGameIsStarting(() => true);
+            const preparationTime = setTimeout(() => {
+                navigate(`${gameURL}`);
+                console.log('triggered');
+                clearTimeout(preparationTime);
+            }, countdown);
+        });
+
+        // socket.on('starting-game', gameURL => {
+        //     navigate(`${gameURL}`);
+        // });
 
         return () => {
             // cleanup listeners
             socket.off('user-connected');
             socket.off('connect_error');
             socket.off('user-disconnected');
-            socket.off('starting-game');
+            // socket.off('starting-game');
+            socket.off('start-countdown');
         }
     }, [socket]);
 
@@ -183,12 +195,19 @@ const GameLobby = () => {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8 h-full">
                 <div className="h-full rounded-lg bg-gray-700 lg:col-span-2 p-6">
                     <div className="flex flex-row gap-6">
+                        <div className="flex flex-col gap-4">
                         {/* Users connected to lobby */}
                         <ul className="flex flex-col gap-3">
-                            {roomUsers && roomUsers.map((user) => {
-                                return <UserListElement key={user.username} user={user}/>
+                            {roomUsers && roomUsers.map((user, index) => {
+                                return <UserListElement key={user.username} user={user} isHost={index === 0}/>
                             })}
                         </ul>
+                        {gameIsStarting &&
+                        <div className="flex flex-row align-center gap-3"><span className="loading loading-spinner loading-sm"></span> Game is starting
+                        </div>
+                        }
+                        </div>
+                        {isHost &&
                         <form className="flex flex-col gap-4" onSubmit={handleStartGame}>
                         <div className="flex flex-row gap-4">
                             <Dropdown name="category" id="category" onSelection={handleSelection} options={["random", "music", "sport and leisure", "film and tv", "arts and literature", "history", "society and culture", "science", "geography", "food and drink", "general knowledge"]}>Category</Dropdown>
@@ -200,6 +219,7 @@ const GameLobby = () => {
                         {errorMessage && <AlertMessage type='warning'>{errorMessage}</AlertMessage>}
                         </div>
                         </form>
+                    }
                     </div>
                 </div>
                 <div className="h-96 max-h-96 rounded-lg bg-gray-700 p-6">

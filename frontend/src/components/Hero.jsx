@@ -1,4 +1,5 @@
 
+import { socket } from "../config/socket";
 import JoinModal from "./JoinModal";
 import { useNavigate } from "react-router-dom";
 
@@ -9,7 +10,7 @@ const Hero = () => {
     // send get request to server
 
     try{
-      const request = await fetch('http://localhost:4000/')
+      const request = await fetch('http://localhost:4000/create-room')
       const response = await request.json();
       
       if (response.status === 201){

@@ -40,7 +40,7 @@ const io = new Server(
 // socket handlers
 const {sendMessage} = require('./handlers/message.handler.js')(io);
 const {joinRoom, userInGame} = require('./handlers/room.handler.js')(io);
-const {startGame, getQuestionResults} = require('./handlers/game.handler.js')(io);
+const {startGame, getUserAnswer, getQuestionResults} = require('./handlers/game.handler.js')(io);
 
 // Server setup
 app.use(express.json());
@@ -53,7 +53,7 @@ app.use(cors({
 }));
 app.use(rateLimiter);
 
-app.get('/', createRoom);
+app.get('/create-room', createRoom);
 
 app.get('/:gameRoomId', verifyRoomExists);
 app.put('/:gameRoomId', updateScore);
@@ -86,7 +86,8 @@ io.on('connection', (socket) => {
     socket.on('send-message', sendMessage);
     socket.on('user-in-game', userInGame);
     socket.on('start-game', startGame);
-    socket.on('send-answer', getQuestionResults)
+    socket.on('send-answer', getQuestionResults);
+    socket.on('user-answer', getUserAnswer);
     
     socket.on('disconnect', (gameRoomId, username) => {
         console.log('A user disconnected');

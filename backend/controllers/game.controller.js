@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb');
 const ShortUniqueId = require('short-unique-id');
+const {rooms} = require('../config/game.config');
 
 const {database} = require('../config/app.config');
 
@@ -57,6 +58,9 @@ const createRoom = async (req, res) => {
         });
 
         if (newRoom.acknowledged){
+            console.log('new room created on db')
+            rooms[gameRoomId] = {"_id": gameRoomId, questions: []};
+            console.log(rooms);
             res.status(201).json({status: 201, message: 'Successful', data: {gameRoomId}});
         };
 
@@ -80,11 +84,11 @@ const addNewUser = async(req, res) => {
 
         if (username){
             const createNewUser = await db.collection('rooms').updateOne({_id: gameRoomId}, {'$set': {[`users.${username}`]: user}});
-
-            console.log(createNewUser)
+            console.log('new user created on db')
 
             if (createNewUser.acknowledged){
-                console.log('new user')
+
+                console.log('new user', username);
                 res.status(201).json({status: 201, message: 'Successful'});
             };
         } else {
