@@ -6,12 +6,21 @@ export default {
   ],
   theme: {
     extend: {},
+    container:{
+      center: true,
+    },
+    colors: {
+
+    },
+    fontFamily: {
+      "primary": ['Poppins', 'Helvetica', 'Arial', 'sans-serif']
+    }
   },
   plugins: [
     require('daisyui'),
   ],
   daisyui: {
-    themes: ['dark'],
+    themes: ['light'],
   },
 }
 

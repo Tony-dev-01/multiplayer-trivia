@@ -4,10 +4,11 @@ import {  useNavigate, useParams } from "react-router-dom";
 import { createPortal } from 'react-dom';
 import Toast from "../../components/Toast";
 import Chat from "../../components/Chat";
-import UserListElement from "../../components/UserListElement";
 import UsernameForm from "../../components/UsernameForm";
 import Dropdown from "../../components/Dropdown";
 import AlertMessage from "../../components/AlertMessage";
+import PlayerCard from "../../components/PlayerCard";
+import { IoCheckmarkCircleOutline } from "react-icons/io5";
 
 const GameLobby = () => {
     const params = useParams();
@@ -17,8 +18,9 @@ const GameLobby = () => {
     const [roomUsers, setRoomUsers] = useState(['']);
     const [openToast, setOpenToast] = useState(false);
     const [usernameSelected, setUsernameSelected] = useState(false);
+    const [codeCopied, setCodeCopied] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
-    const [gameSettings, setGameSettings] = useState({});
+    const [gameSettings, setGameSettings] = useState({questions: 10});
     const [errorMessage, setErrorMessage] = useState(undefined);
     const [gameIsStarting, setGameIsStarting] = useState(false);
     const isHost = roomUsers[0].username === username;
@@ -65,7 +67,7 @@ const GameLobby = () => {
     };
 
     const handleStartGame = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         if (Object.keys(gameSettings).length === 3 && !Object.values(gameSettings).includes('-')) {
             setErrorMessage(() => undefined)
             console.log('game starting...')
@@ -74,6 +76,15 @@ const GameLobby = () => {
             setErrorMessage(() => 'Please select game options.')
         }
     };
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(gameRoomId);
+        setCodeCopied(true);
+        const delay = setTimeout(() => {
+            setCodeCopied(false);
+            clearTimeout(delay);
+        }, 12000)
+    }
 
     
     useEffect(() => {
@@ -181,7 +192,8 @@ const GameLobby = () => {
     }, [isConnected])
 
     return(
-        <div className="w-full h-full"> 
+        <div className="w-full h-full flex justify-center"> 
+        <div className="container p-6 flex flex-col gap-6">
         <UsernameForm handleSubmit={onUsernameSelection} open={!isConnected} />
         {isConnected && usernameSelected &&
         <>
@@ -190,16 +202,28 @@ const GameLobby = () => {
             , document.getElementById('toast'))
             }
 
-            <h1 className="font-2xl">Welcome to your game lobby!</h1>
+            <div className="flex flex-col gap-4 justify-center">
+                <h1 className="text-2xl">Welcome to your game lobby, {username}.</h1>
+                <div className="flex flex-col gap-2">
+                    <p>game code</p> 
+                    <div className="flex gap-2 items-center p-2 bg-base-300 w-fit rounded-lg">
+                    <p className="input input-md font-700 text-black bg-transparent flex justify-start items-center font-medium text-xl tracking-wider pl-2">{gameRoomId}</p>
+                <div className="lg:tooltip" data-tip={codeCopied ? "Copied!" : "Copy"}>
+                    <button className="btn" onClick={handleCopy}>{codeCopied ? <IoCheckmarkCircleOutline className="text-success" size="2em"/> : "Copy"}</button>
+                </div>
+                    </div>
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8 h-full">
-                <div className="h-full rounded-lg bg-gray-700 lg:col-span-2 p-6">
+                <div className="h-full rounded-lg  lg:col-span-2 p-6 bg-base-200">
                     <div className="flex flex-row gap-6">
                         <div className="flex flex-col gap-4">
                         {/* Users connected to lobby */}
-                        <ul className="flex flex-col gap-3">
+                        <h2 id="list-title">Player list</h2>
+                        <ul aria-labelledby="list-title" className="flex flex-col gap-3 max-w-48">
                             {roomUsers && roomUsers.map((user, index) => {
-                                return <UserListElement key={user.username} user={user} isHost={index === 0}/>
+                                return <PlayerCard key={user.username} user={user} isHost={index === 0}/>
                             })}
                         </ul>
                         {gameIsStarting &&
@@ -212,7 +236,7 @@ const GameLobby = () => {
                         <div className="flex flex-row gap-4">
                             <Dropdown name="category" id="category" onSelection={handleSelection} options={["random", "music", "sport and leisure", "film and tv", "arts and literature", "history", "society and culture", "science", "geography", "food and drink", "general knowledge"]}>Category</Dropdown>
                             <Dropdown name="difficulty" id="difficulty" onSelection={handleSelection} options={['Easy', 'Medium', 'Hard']}>Difficulty</Dropdown>
-                            <Dropdown name="questions" id="questions" onSelection={handleSelection} options={['10', '15', '20', '25']}>Number of questions</Dropdown>
+                            {/* <Dropdown name="questions" id="questions" onSelection={handleSelection} options={['10', '15', '20', '25']}>Number of questions</Dropdown> */}
                         </div>
                         <div>
                         <button type="submit" className="btn btn-primary">Start game</button>
@@ -222,7 +246,7 @@ const GameLobby = () => {
                     }
                     </div>
                 </div>
-                <div className="h-96 max-h-96 rounded-lg bg-gray-700 p-6">
+                <div className="h-full rounded-lg  lg:col-span-1 p-6 bg-base-200">
                     {/* Chat display here */}
                     <Chat username={username} />
                 </div>
@@ -231,6 +255,7 @@ const GameLobby = () => {
             
             </>
         }
+        </div>
         </div>
     )
 };

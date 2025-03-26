@@ -66,16 +66,16 @@ const Chat = ({username}) => {
     };
 
     return(
-        <div className="w-full h-full relative flex flex-col gap-4">
-        <div className="w-full h-full overflow-y-scroll relative flex flex-col gap-4" >
+        <div className="w-full relative flex flex-col gap-4 h-96 max-h-96 rounded-lg p-6 bg-base-300">
+        <div className="w-full h-full overflow-y-scroll overflow-x-hidden relative flex flex-col gap-4" >
         {messages.map((message, messageIndex) => {
             return (
                 <div key={messageIndex} className={`chat ${message.username !== username ? 'chat-start' : 'chat-end'} w-full`}>
-                    <div className="chat-header">
+                    <div className="chat-header break-all">
                         {message.username === username ? 'Me' : message.username}
                         {/* <time className="text-xs opacity-50">2 hours ago</time> */}
                     </div>
-                    <div className={`chat-bubble text-white ${message.username !== username ? 'bg-primary' : 'bg-secondary'}`}>{message.message}</div>
+                    <div className={`chat-bubble break-all leading-5 text-white ${message.username !== username ? 'bg-primary' : 'bg-secondary'}`}>{message.message}</div>
                 </div>
             )
         })}
@@ -85,9 +85,9 @@ const Chat = ({username}) => {
             <div className="relative">
                 {isError && <AlertMessage type="warning">{errorMessage}</AlertMessage>}
             </div>
-            <div className="flex flex-row gap-2 flex-wrap relative">
-            <input type="text" value={userInput} placeholder="Type your message..." ref={chatbox} onChange={(e) => setUserInput(e.target.value)} className="rounded-lg px-2"/>
-            <button className="btn btn-primary rounded-lg" disabled={userInput.length === 0}>Send</button>
+            <div className="flex flex-row gap-3 relative">
+                <input type="text" value={userInput} placeholder="Type your message..." ref={chatbox} onChange={(e) => setUserInput(e.target.value)} className="rounded-lg px-2 w-full"/>
+                <button className="btn btn-primary rounded-lg" disabled={userInput.length === 0}>Send</button>
             </div>
         </form>
         </div>

@@ -10,7 +10,7 @@ const AlertMessage = ({children, type="alert"}) => {
     </svg> ;
 
     return(
-        <div role="alert" className={`mt-3 ${type === 'alert'? 'text-red-500' : 'text-yellow-300'}`}><p className="flex flex-row gap-1"><GoAlert /> {children}</p></div>
+        <div role="alert" className={`mt-3 ${type === 'alert'? 'text-error' : 'text-warning'}`}><p className="flex flex-row gap-1"><GoAlert /> {children}</p></div>
     )
 };
 

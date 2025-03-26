@@ -53,14 +53,8 @@ const calculateUserScore = (userAnswer) => {
 
 
 module.exports = (io) => {
-  const checkRams = (gameRoomId) => {
-    console.log(rooms);
-  }
-  
 
     const broadcastQuestion = (gameRoomId) => {
-        checkRams(gameRoomId);
-        // rams are getting cleared on second call
         let questionsRemaining = rooms[gameRoomId].questionsRemaining;
         questionsRemaining = questionsRemaining - 1;
         const currentQuestion = rooms[gameRoomId].questions[questionsRemaining];
@@ -73,43 +67,27 @@ module.exports = (io) => {
         };
         rooms[gameRoomId].questionsRemaining = questionsRemaining;
         io.sockets.to(gameRoomId).emit('new-question', refactoredQuestionObject);
-      
-        // // send a question every 25 seconds
-        // const questionFetchInterval = setInterval(() => {
-        //     if (questionsRemaining >= 0){
-        //         const currentQuestion = questions[questionsRemaining];
-        //         const answers = shuffleAnswers([currentQuestion.correctAnswer, ...currentQuestion.incorrectAnswers])
-        //         const refactoredQuestionObject = {
-        //             id: currentQuestion.id,
-        //             answers,
-        //             question: currentQuestion.question
-        //         };
-        //         io.sockets.to(gameRoomId).emit('new-question', refactoredQuestionObject);
-        //         questionsRemaining--;
-        //     } else {
-        //         // game finished
-        //         clearInterval(questionFetchInterval);
-        //     }
-        // }, 25000);
 
-        const questionTimer = setInterval(() => {
-          clearInterval(questionTimer);
-          const listOfUserAnswers = Object.entries(rooms[gameRoomId].users).map(([username, value]) => {
+        const displayScoreToRoom = setInterval(() => {
+          clearInterval(displayScoreToRoom);
+          const scores = Object.entries(rooms[gameRoomId].users).map(([username, value]) => {
             return {
               username,
               ...value
             };
           });
-          io.sockets.to(gameRoomId).emit('scoreboard', listOfUserAnswers);
+          
           if (rooms[gameRoomId].questionsRemaining === 0){
             // game is over
+            io.sockets.to(gameRoomId).emit('game-over', scores, rooms[gameRoomId].questionsRemaining);
             console.log('game over!');
           } else {
-            const displayScoreboard = setInterval(() => {
+            io.sockets.to(gameRoomId).emit('scoreboard', scores, rooms[gameRoomId].questionsRemaining);
+            const displayQuestionToRoom = setInterval(() => {
               broadcastQuestion(gameRoomId);
               // console.log(rooms[gameRoomId]);
-              clearInterval(displayScoreboard);
-            }, 10000)
+              clearInterval(displayQuestionToRoom);
+            }, 7000)
           }
           
         }, 15000);
@@ -125,8 +103,26 @@ module.exports = (io) => {
         // io.sockets.to(gameRoomId).emit('starting-game', gameURL);
 
         // fetch question from api here and store it in question variable
+        // let request;
+        // let questions;
+
+        // const fetchQuestions = async () => {
+        //   // returns 10 questions per call
+        //   request = await fetch(`https://the-trivia-api.com/v2/questions?categories=${categories}&&difficulties=${difficulties}`);
+        //   questions = await request.json();
+        // };
+
+        // if (numQuestions === 15){
+        
+        // } else if (numQuestions === 20){
+
+        // } else {
+        
+        // }
+
         // const request = await fetch(`https://the-trivia-api.com/v2/questions?categories=${categories}&&difficulties=${difficulties}`);
         // const questions = await request.json();
+      
         const questions = [
             {
                 category: 'music',
@@ -263,7 +259,6 @@ module.exports = (io) => {
                 isNiche: false
               }
         ]
-        console.log(questions);
 
         // Store questions in DB?
 

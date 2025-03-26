@@ -3,6 +3,7 @@ import { socket } from "../../config/socket";
 import { useParams, useSearchParams } from "react-router-dom";
 import Countdown from "../../components/Countdown";
 import Scoreboard from "../../components/Scoreboard";
+import FinalScore from "../../components/FinalScore";
 
 
 const Game = () => {
@@ -19,7 +20,8 @@ const Game = () => {
     const [timeRemaining, setTimeRemaining] = useState(10);
     const [correctAnswer, setCorrectAnswer] = useState('');
     const [displayScoreboard, setDisplayScoreboard] = useState(false);
-    const [usersScore, setUsersScore] = useState([]);
+    const [gameIsOver, setGameIsOver] = useState(false);
+    const [usersScores, setUsersScores] = useState([]);
     const questionTimer = 10;
     const timeout = timeRemaining === 0;
     const gameHasStarted = Object.values(currentQuestion).length > 0;
@@ -68,25 +70,33 @@ const Game = () => {
             console.log(question);
         });
 
-        socket.on('scoreboard', (usersScore) => {
+        socket.on('scoreboard', (scores, questionsRemaining) => {
             // display scoreboard
+            console.log(scores, questionsRemaining)
             setSelectedAnswer('');
-            setUsersScore(usersScore);
+            setUsersScores({scores, questionsRemaining});
             setTimeRemaining(questionTimer);
             setDisplayScoreboard(() => true);
             console.log('displaying scoreboard')
         });
 
+        socket.on('game-over', (finalScores, questionsRemaining) => {
+            setUsersScores(finalScores, questionsRemaining);
+            setGameIsOver(true);
+            console.log('display final score');
+        })
+
         return () => {
             socket.off('new-question');
             socket.off('scoreboard');
+            socket.off('game-over');
         }
     }, [socket]);
 
     const highlightAnswers = (answer) => {
         // return color based on if answer is correct, selected or is false
         if (correctAnswer === answer){
-            if (selectedAnswer === correctAnswer){
+            if (selectedAnswer == correctAnswer){
                 // User got it right and this is the correct answer
                 return 'disabled:bg-green-300';
             } else {
@@ -105,8 +115,8 @@ const Game = () => {
     }
 
     const verifyAnswer = async (answer) => {
-        // send answer to backend
-        // backend calculates the score and stores it in DB
+        // send answer to server
+        // server calculates the score and returns it
         socket.timeout(10000).emit('user-answer', {gameRoomId, username, answer: {...answer}}, (err, callback) => {
             console.log(callback);
             setCorrectAnswer(callback.correctAnswer);
@@ -122,13 +132,17 @@ const Game = () => {
     };
 
     const handleTimeout = () => {
-        // send answer to server 
         if (selectedAnswer === ''){
             verifyAnswer({answer: undefined, timeRemaining: 0, questionId: currentQuestion.id});
         };
 
-        setTimeUp(() => true);
-        setTimer(() => false);
+        // delay to get the timer to 0
+        const delay = setTimeout(() => {
+            setTimeUp(() => true);
+            setTimer(() => false);
+            clearTimeout(delay);
+        }, 1500);
+
 
     }
 
@@ -136,7 +150,10 @@ const Game = () => {
         <div className="w-[80vw] h-[100vh] m-auto py-16 flex flex-col justify-center items-center">
             {gameHasStarted ? 
                 displayScoreboard ?
-                    <Scoreboard usersScore={usersScore} /> :
+                    <Scoreboard usersScores={usersScores} /> :
+                    gameIsOver ? 
+                    <FinalScore usersScores={usersScores}/>
+                    :
             <>
             <span className="countdown font-mono text-6xl">
             {timeUp && hasCorrectAnswer ? 'good job' : timeUp && !hasCorrectAnswer ? 'you got it wrong' : <span style={{"--value": timeRemaining}}></span>}
@@ -145,13 +162,13 @@ const Game = () => {
             <form className="flex flex-col gap-4 w-full h-full" onClick={handleAnswer}>
             <h2 className="text-2xl font-bold">{currentQuestion.question.text}</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-4 gap-4">
-                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary ${selectedAnswer === currentQuestion.answers[0] ? 'disabled:bg-secondary' : 'disabled:bg-gray-400'} ${timeUp && highlightAnswers(currentQuestion.answers[0])}`} disabled={timeout || hasAnswered} value={currentQuestion.answers[0]}>{currentQuestion.answers[0]}</button>
-                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary ${selectedAnswer === currentQuestion.answers[1] ? 'disabled:bg-secondary' : 'disabled:bg-gray-400'} ${timeUp && highlightAnswers(currentQuestion.answers[1])}`} disabled={timeout || hasAnswered} value={currentQuestion.answers[1]}>{currentQuestion.answers[1]}</button>
+                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary ${selectedAnswer === currentQuestion.answers[0] && !timeUp ? 'disabled:bg-secondary' : !timeUp ? 'disabled:bg-gray-400' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[0])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[0]}>{currentQuestion.answers[0]}</button>
+                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary  ${selectedAnswer === currentQuestion.answers[1] && !timeUp ? 'disabled:bg-secondary' : !timeUp ? 'disabled:bg-gray-400' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[1])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[1]}>{currentQuestion.answers[1]}</button>
             </div>
     
             <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-4 gap-4">
-                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary ${selectedAnswer === currentQuestion.answers[2] ? 'disabled:bg-secondary' : 'disabled:bg-gray-400'} ${timeUp && highlightAnswers(currentQuestion.answers[2])}`} disabled={timeout || hasAnswered} value={currentQuestion.answers[2]}>{currentQuestion.answers[2]}</button>
-                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary ${selectedAnswer === currentQuestion.answers[3] ? 'disabled:bg-secondary' : 'disabled:bg-gray-400'} ${timeUp && highlightAnswers(currentQuestion.answers[3])}`} disabled={timeout || hasAnswered} value={currentQuestion.answers[3]}>{currentQuestion.answers[3]}</button>
+                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary ${selectedAnswer === currentQuestion.answers[2] && !timeUp ? 'disabled:bg-secondary' : !timeUp ? 'disabled:bg-gray-400' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[2])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[2]}>{currentQuestion.answers[2]}</button>
+                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary  ${selectedAnswer === currentQuestion.answers[3] && !timeUp ? 'disabled:bg-secondary' : !timeUp ? 'disabled:bg-gray-400' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[3])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[3]}>{currentQuestion.answers[3]}</button>
             </div>
     
             </form>
