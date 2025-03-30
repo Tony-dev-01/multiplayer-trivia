@@ -9,19 +9,25 @@ const Hero = () => {
   const handleCreateGame = async () => {
     // send get request to server
 
-    try{
-      const request = await fetch('http://localhost:4000/create-room')
-      const response = await request.json();
+    // try{
+    //   const request = await fetch('http://localhost:4000/create-room')
+    //   const response = await request.json();
       
-      if (response.status === 201){
-        navigate(`/${response.data.gameRoomId}`); // navigate user to their new room
-      } else {
-        throw new Error(response.message);
+    //   if (response.status === 201){
+    //     navigate(`/${response.data.gameRoomId}`); // navigate user to their new room
+    //   } else {
+    //     throw new Error(response.message);
+    //   }
+      
+    // } catch (err){
+    //   console.log(err.message);
+    // }
+    socket.emit('create-room', (callback) => {
+      if (callback.status === 'OK'){
+        console.log(callback);
+        navigate(`/${callback.gameRoomId}`);
       }
-      
-    } catch (err){
-      console.log(err.message);
-    }
+    });
   };
 
     return(

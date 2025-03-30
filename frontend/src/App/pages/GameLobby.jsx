@@ -25,30 +25,12 @@ const GameLobby = () => {
     const [gameIsStarting, setGameIsStarting] = useState(false);
     const isHost = roomUsers[0].username === username;
     const navigate = useNavigate();
-    // const response = UseFetchApi('/game');
-
-    // const toastEventType = newUserJoining ? 'User joined' : 'User disconnected';
-    // const toastMessage =  newUserJoining === sessionStorage.username ? 'You joined the room.' : newUserJoining + ' joined the room.'
     
     const onUsernameSelection = async (e, username) => {
         e.preventDefault();
-        const role = 'subscriber';
         sessionStorage.setItem('username', username); // store username in session storage 
-        sessionStorage.setItem('role', role); // store role in session storage 
         
         try {
-            const request = await fetch(`http://localhost:4000/${gameRoomId}/user`, {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-type': 'application/json'
-                },
-                body: JSON.stringify({gameRoomId, username})
-            });
-
-            const response = await request.json();
-
-            console.log(response);
             socket.auth = { username };
             socket.connect();
             setUsernameSelected(() => true);
@@ -84,6 +66,11 @@ const GameLobby = () => {
             setCodeCopied(false);
             clearTimeout(delay);
         }, 12000)
+    };
+
+    const handleToastClose = () => {
+        setToastMessage('');
+        setOpenToast(false);
     }
 
     
@@ -94,19 +81,6 @@ const GameLobby = () => {
                 if (sessionStorage.getItem('username')){
                     const username = sessionStorage.getItem('username')
                     setUsernameSelected(() => true);
-
-                    // const request = await fetch(`http://localhost:4000/${gameRoomId}/user`, {
-                    //     method: 'PUT',
-                    //     headers: {
-                    //         'Accept': 'application/json',
-                    //         'Content-type': 'application/json'
-                    //     },
-                    //     body: JSON.stringify({gameRoomId, username})
-                    // });
-
-                    // const response = await request.json();
-
-
                     socket.auth = { username };
                     socket.connect();
                     setIsConnected(() => true);
@@ -121,9 +95,9 @@ const GameLobby = () => {
         createNewUser();
 
         // Disconnect any users that are leaving the page
-        // return () => {
-        //     socket.disconnect(gameRoomId, sessionStorage.getItem('username'));
-        // }
+        return () => {
+            socket.disconnect(gameRoomId, sessionStorage.getItem('username'));
+        }
     }, [])
 
     // Display toast when new user joins
@@ -149,6 +123,7 @@ const GameLobby = () => {
         });
 
         socket.on('user-connected', (username, roomUsers) => {
+            console.log(roomUsers)
             setToastMessage(() => `${username} has joined`);
             setRoomUsers(() => roomUsers); // get updated list of users on new connection
             setOpenToast(() => true); // display the notification
@@ -168,6 +143,10 @@ const GameLobby = () => {
             }, countdown);
         });
 
+        socket.on('disconnect', () => {
+            socket.emit('delete-user', gameRoomId, username);
+        });
+
         // socket.on('starting-game', gameURL => {
         //     navigate(`${gameURL}`);
         // });
@@ -177,6 +156,7 @@ const GameLobby = () => {
             socket.off('user-connected');
             socket.off('connect_error');
             socket.off('user-disconnected');
+            socket.off('disconnect');
             // socket.off('starting-game');
             socket.off('start-countdown');
         }
@@ -186,9 +166,13 @@ const GameLobby = () => {
         // join room on connection
         if (isConnected){
             socket.timeout(10000).emit('join-room', gameRoomId, username, (error, callback) => {
-            setRoomUsers(() => callback.roomUsers || []); // Get initial list of room users when joining a room
+                setRoomUsers(() => callback.roomUsers || []); // Get initial list of room users when joining a room
             });
         };
+
+        return () => {
+            socket.off('join-room');
+        }
     }, [isConnected])
 
     return(
@@ -198,7 +182,7 @@ const GameLobby = () => {
         {isConnected && usernameSelected &&
         <>
             {openToast && createPortal(
-                <Toast title="User joined" message={toastMessage || 'undefined'} />
+                <Toast title="User joined" message={toastMessage || 'undefined'} onClose={handleToastClose} />
             , document.getElementById('toast'))
             }
 
@@ -223,7 +207,7 @@ const GameLobby = () => {
                         <h2 id="list-title">Player list</h2>
                         <ul aria-labelledby="list-title" className="flex flex-col gap-3 max-w-48">
                             {roomUsers && roomUsers.map((user, index) => {
-                                return <PlayerCard key={user.username} user={user} isHost={index === 0}/>
+                                return <PlayerCard key={user.username} user={user} isHost={index === 0} isMe={user.username === username}/>
                             })}
                         </ul>
                         {gameIsStarting &&
@@ -251,8 +235,6 @@ const GameLobby = () => {
                     <Chat username={username} />
                 </div>
             </div>
-
-            
             </>
         }
         </div>

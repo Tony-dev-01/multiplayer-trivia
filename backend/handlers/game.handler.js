@@ -13,8 +13,6 @@ const shuffleAnswers = (array) => {
     return array;
 };
 
-const networkBuffer = 1000; // 1 second buffer for events
-
 const calculateUserScore = (userAnswer) => {
   const {gameRoomId, username, answer} = userAnswer;
   const currentQuestion = rooms[gameRoomId].questions[rooms[gameRoomId].questionsRemaining];

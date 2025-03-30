@@ -1,10 +1,10 @@
 
 
-const Toast = ({title, message, handleClose,}) => {
+const Toast = ({title, message, onClose}) => {
     return(
-    <div role="alert" className="rounded-xl border border-gray-100 bg-white p-4 toast toast-end">
+    <div role="alert" className="rounded-xl border border-gray-100 p-4 toast toast-end bg-neutral-content z-40">
     <div className="flex items-start gap-4">
-        <span className="text-green-600">
+        <span className="text-success">
         <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -27,7 +27,7 @@ const Toast = ({title, message, handleClose,}) => {
         <p className="mt-1 text-sm text-gray-700">{message}</p>
         </div>
     
-        <button className="text-gray-500 transition hover:text-gray-600" onClick={() => handleClose}>
+        <button className="text-gray-500 transition hover:text-gray-600" onClick={onClose}>
         <span className="sr-only">Dismiss popup</span>
     
         <svg

@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AlertMessage from "./AlertMessage";
+import { numberValidation } from "../App/inputValidation";
+
+import {socket} from "../config/socket";
 
 const JoinModal = () => {
-    const [userInput, setUserInput] = useState('');
+    const [userInput, setUserInput] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -13,21 +16,25 @@ const JoinModal = () => {
     const handleJoinRoom = async (e) => {
         e.preventDefault();
         const gameRoomId = userInput;
+
         setError(() => '');
         setIsLoading(() => true);
-
+        
         try {
-            const request = await fetch(`http://localhost:4000/${gameRoomId}`);
-
-            const response = await request.json();
-
-            if (response.status === 200){
-                setIsLoading(() => false);
-                navigate(`/${gameRoomId}`);
-            } else {
-                throw new Error(response.message);
-            }
+            await numberValidation(Number(userInput));
+            
+            socket.emit('verify-room', gameRoomId, ( callback) => {
+                if (callback.status === 'OK'){
+                    // room exists and proceed to join
+                    navigate(`/${gameRoomId}`);
+                } else if (callback.status === 'ERROR') {
+                    // throw new Error(callback.message);
+                    setIsLoading(() => false);
+                    setError(() => callback.message);
+                }
+            });
         } catch(err) {
+            console.log(err.message)
             setIsLoading(() => false);
             setError(() => err.message);
         }
@@ -45,7 +52,8 @@ const JoinModal = () => {
             <p className="py-4">Enter your game code here to join.</p>
             <form onSubmit={handleJoinRoom} className="flex flex-col gap-2">
             <input
-                type="text"
+                type="number"
+                name="game-code"
                 placeholder="Type here"
                 className="input input-bordered input-primary w-full max-w-xs" 
                 onChange={(e) => setUserInput(e.target.value)}

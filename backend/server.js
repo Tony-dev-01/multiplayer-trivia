@@ -21,7 +21,7 @@ const {authentication} = require('./middlewares/auth.middleware.js');
 // const routes = require('./routes');
 
 // Controllers
-const {updateScore, createRoom, addNewUser, verifyRoomExists} = require('./controllers/game.controller.js');
+
 
 const shortUUID = new ShortUniqueId({dictionary: 'number', length: 10}).dict.join('');
 const httpServer = http.createServer(app);
@@ -39,7 +39,7 @@ const io = new Server(
 
 // socket handlers
 const {sendMessage} = require('./handlers/message.handler.js')(io);
-const {joinRoom, userInGame} = require('./handlers/room.handler.js')(io);
+const {createRoom, verifyRoom, joinRoom, userInGame, userDisconnect} = require('./handlers/room.handler.js')(io);
 const {startGame, getUserAnswer, getQuestionResults} = require('./handlers/game.handler.js')(io);
 
 // Server setup
@@ -53,12 +53,6 @@ app.use(cors({
 }));
 app.use(rateLimiter);
 
-app.get('/create-room', createRoom);
-
-app.get('/:gameRoomId', verifyRoomExists);
-app.put('/:gameRoomId', updateScore);
-app.put('/:gameRoomId/user', addNewUser);
-
 // Catch all endpoint
 app.get('*', (req, res) => {
     res.status(404).json({
@@ -68,7 +62,6 @@ app.get('*', (req, res) => {
 })
 
 // Web socket
-
 io.use((socket, next) => {
     const username = socket.handshake.auth.username;
     const role = socket.handshake.auth.role;
@@ -82,6 +75,8 @@ io.use((socket, next) => {
 
 
 io.on('connection', (socket) => {
+    socket.on('create-room', createRoom);
+    socket.on('verify-room', verifyRoom);
     socket.on('join-room', joinRoom);
     socket.on('send-message', sendMessage);
     socket.on('user-in-game', userInGame);
@@ -89,10 +84,8 @@ io.on('connection', (socket) => {
     socket.on('send-answer', getQuestionResults);
     socket.on('user-answer', getUserAnswer);
     
-    socket.on('disconnect', (gameRoomId, username) => {
-        console.log('A user disconnected');
-        socket.to(gameRoomId).emit('user-disconnected', username)
-    });
+    socket.on('delete-user', userDisconnect);
+    socket.on('disconnect', () => console.log('disconnect event'));
     
     socket.onAny((event, ...args) => {
         console.log(event, args);
