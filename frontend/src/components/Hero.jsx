@@ -1,4 +1,5 @@
 
+import { useEffect } from "react";
 import { socket } from "../config/socket";
 import JoinModal from "./JoinModal";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +30,12 @@ const Hero = () => {
       }
     });
   };
+
+  useEffect(() => {
+    return() => {
+      socket.disconnect();
+    }
+  }, [])
 
     return(
       <>

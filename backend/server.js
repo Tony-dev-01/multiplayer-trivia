@@ -84,8 +84,8 @@ io.on('connection', (socket) => {
     socket.on('send-answer', getQuestionResults);
     socket.on('user-answer', getUserAnswer);
     
-    socket.on('delete-user', userDisconnect);
-    socket.on('disconnect', () => console.log('disconnect event'));
+    // socket.on('delete-user', userDisconnect);
+    socket.on('disconnect', () => userDisconnect(socket));
     
     socket.onAny((event, ...args) => {
         console.log(event, args);

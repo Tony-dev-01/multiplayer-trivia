@@ -8,6 +8,7 @@ import UsernameForm from "../../components/UsernameForm";
 import Dropdown from "../../components/Dropdown";
 import AlertMessage from "../../components/AlertMessage";
 import PlayerCard from "../../components/PlayerCard";
+import Game from "./Game";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 
 const GameLobby = () => {
@@ -19,11 +20,12 @@ const GameLobby = () => {
     const [openToast, setOpenToast] = useState(false);
     const [usernameSelected, setUsernameSelected] = useState(false);
     const [codeCopied, setCodeCopied] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
+    const [toast, setToast] = useState({});
     const [gameSettings, setGameSettings] = useState({questions: 10});
     const [errorMessage, setErrorMessage] = useState(undefined);
     const [gameIsStarting, setGameIsStarting] = useState(false);
-    const isHost = roomUsers[0].username === username;
+    const [gameHasStarted, setGameHasStarted] = useState(false);
+    const isHost = username ? roomUsers[0].username === username : null;
     const navigate = useNavigate();
     
     const onUsernameSelection = async (e, username) => {
@@ -31,12 +33,11 @@ const GameLobby = () => {
         sessionStorage.setItem('username', username); // store username in session storage 
         
         try {
-            socket.auth = { username };
+            socket.auth = { username, gameRoomId };
             socket.connect();
             setUsernameSelected(() => true);
             setIsConnected(() => true);
         } catch(err){
-            console.log(err.message)
         }
     };
 
@@ -52,7 +53,6 @@ const GameLobby = () => {
         e.preventDefault();
         if (Object.keys(gameSettings).length === 3 && !Object.values(gameSettings).includes('-')) {
             setErrorMessage(() => undefined)
-            console.log('game starting...')
             socket.timeout(10000).emit('start-game', gameRoomId, username, gameSettings.category, gameSettings.difficulty, gameSettings.questions);
         } else {
             setErrorMessage(() => 'Please select game options.')
@@ -69,11 +69,10 @@ const GameLobby = () => {
     };
 
     const handleToastClose = () => {
-        setToastMessage('');
+        setToast({});
         setOpenToast(false);
     }
 
-    
     useEffect(() => {
         const createNewUser = async () => {
             try {
@@ -81,23 +80,18 @@ const GameLobby = () => {
                 if (sessionStorage.getItem('username')){
                     const username = sessionStorage.getItem('username')
                     setUsernameSelected(() => true);
-                    socket.auth = { username };
+                    socket.auth = { username, gameRoomId };
                     socket.connect();
                     setIsConnected(() => true);
                 } else {
                     return;
                 }
             } catch(err){
-                console.log(err.message)
             }
         }
 
         createNewUser();
 
-        // Disconnect any users that are leaving the page
-        return () => {
-            socket.disconnect(gameRoomId, sessionStorage.getItem('username'));
-        }
     }, [])
 
     // Display toast when new user joins
@@ -123,52 +117,55 @@ const GameLobby = () => {
         });
 
         socket.on('user-connected', (username, roomUsers) => {
-            console.log(roomUsers)
-            setToastMessage(() => `${username} has joined`);
+            const newToast = {event: 'connect', username};
+            setToast(() => newToast);
             setRoomUsers(() => roomUsers); // get updated list of users on new connection
             setOpenToast(() => true); // display the notification
         });
 
-        socket.on('user-disconnected', username => {
-            setToastMessage(() => `${username} has disconnected`);
+        socket.on('user-disconnected', (username, roomUsers) => {
+            const newToast = {event: 'disconnect', username};
+            setToast(() => newToast);
             setOpenToast(() => true);
+            // Update list of users
+            setRoomUsers(() => roomUsers);
         });
 
         socket.on('start-countdown', (countdown, gameURL) => {
             setGameIsStarting(() => true);
             const preparationTime = setTimeout(() => {
-                navigate(`${gameURL}`);
-                console.log('triggered');
+                // navigate(`${gameURL}`);
+                setGameHasStarted(true);
                 clearTimeout(preparationTime);
             }, countdown);
         });
 
-        socket.on('disconnect', () => {
-            socket.emit('delete-user', gameRoomId, username);
-        });
-
-        // socket.on('starting-game', gameURL => {
-        //     navigate(`${gameURL}`);
-        // });
 
         return () => {
             // cleanup listeners
             socket.off('user-connected');
             socket.off('connect_error');
             socket.off('user-disconnected');
-            socket.off('disconnect');
-            // socket.off('starting-game');
             socket.off('start-countdown');
+            socket.disconnect();
         }
     }, [socket]);
 
     useEffect(() => {
         // join room on connection
-        if (isConnected){
-            socket.timeout(10000).emit('join-room', gameRoomId, username, (error, callback) => {
-                setRoomUsers(() => callback.roomUsers || []); // Get initial list of room users when joining a room
-            });
+        const joinRoom = async () => {
+            if (isConnected){
+                try {
+                    await socket.timeout(10000).emit('join-room', gameRoomId, username, (error, callback) => {
+                        setRoomUsers(() => callback.roomUsers || []); // Get initial list of room users when joining a room
+                    });
+                } catch(err) {
+                    navigate('/');
+                }
+            };
         };
+
+        joinRoom();
 
         return () => {
             socket.off('join-room');
@@ -179,10 +176,10 @@ const GameLobby = () => {
         <div className="w-full h-full flex justify-center"> 
         <div className="container p-6 flex flex-col gap-6">
         <UsernameForm handleSubmit={onUsernameSelection} open={!isConnected} />
-        {isConnected && usernameSelected &&
+        {isConnected && usernameSelected && !gameHasStarted ?
         <>
             {openToast && createPortal(
-                <Toast title="User joined" message={toastMessage || 'undefined'} onClose={handleToastClose} />
+                <Toast toast={toast} onClose={handleToastClose} />
             , document.getElementById('toast'))
             }
 
@@ -235,11 +232,11 @@ const GameLobby = () => {
                     <Chat username={username} />
                 </div>
             </div>
-            </>
+            </> :
+            <Game />
         }
         </div>
         </div>
     )
 };
-
 export default GameLobby;

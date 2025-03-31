@@ -13,6 +13,7 @@ const HomePage = () => {
 
         return () => {
             socket.off('connect');
+            socket.disconnect(undefined, undefined);
         }
     }, []);
 

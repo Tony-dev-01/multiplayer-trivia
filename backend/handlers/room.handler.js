@@ -13,44 +13,47 @@ module.exports = (io) => {
         const socket = this;
 
         try{
-        socket.join(gameRoomId); // join the room lobby
+            if (!rooms[gameRoomId]){
+                // Create new room in rooms object
+                rooms[gameRoomId] = {"_id": gameRoomId, questions: [], users: {}, onlineUsers: 0};
+            }
+            socket.join(gameRoomId); // join the room lobby
 
-        // update number of online players
-        if (rooms[gameRoomId].users[username] === undefined){
-            let updatedOnlineUsers = rooms[gameRoomId].onlineUsers + 1;
-            rooms[gameRoomId].onlineUsers = updatedOnlineUsers;
+            // update number of online players
+            let updatedOnlineUsers = rooms[gameRoomId].onlineUsers;
+            rooms[gameRoomId].onlineUsers = updatedOnlineUsers + 1;
             
             // add user to the room
             const newUser = { username, "score": 0, "numWrongAnswers": 0, "numCorrectAnswers": 0}
             rooms[gameRoomId].users[username] = newUser;
-        } else {
-            console.log('user already in room');
-        }
+
+                
+            const roomUsers = Object.entries(rooms[gameRoomId].users).map(([key, value]) => ({
+                username: key,
+                ...value
+            }));
+
+            console.log('joining room: ' + rooms[gameRoomId])
+
+            // const sockets = await io.in(gameRoomId).fetchSockets();
+
+            // const roomUsers = sockets.map(socket => {
+            //     return {
+            //         roomUserId: socket.id,
+            //         username: socket.username
+            //     };
+            // });
+            console.log(rooms)
+
+            socket.to(gameRoomId).emit('user-connected', username, roomUsers);
+
+            callback({
+                status: 'ok',
+                message: 'You joined the room.',
+                roomUsers
+            })
             
-        const roomUsers = Object.entries(rooms[gameRoomId].users).map(([key, value]) => ({
-            username: key,
-            ...value
-        }));
-
-
-        // const sockets = await io.in(gameRoomId).fetchSockets();
-
-        // const roomUsers = sockets.map(socket => {
-        //     return {
-        //         roomUserId: socket.id,
-        //         username: socket.username
-        //     };
-        // });
-
-        socket.to(gameRoomId).emit('user-connected', username, roomUsers);
-
-        callback({
-            status: 'ok',
-            message: 'You joined the room.',
-            roomUsers
-        })
-        
-        console.log(socket.username + ' joined room ' + gameRoomId)
+            console.log(socket.username + ' joined room ' + gameRoomId)
         } catch(err){
             callback({
                 status: "ERROR",
@@ -94,19 +97,48 @@ module.exports = (io) => {
         })
     };
 
-    const userDisconnect = async (gameRoomId, username) => {
+    const userDisconnect = async (socket) => {
         // remove the user from room
+        // console.log(socket.auth.username);
+        // console.log(socket.auth.gameRoomId);
+        const username = socket.handshake.auth.username;
+        const gameRoomId = socket.handshake.auth.gameRoomId;
+        // console.log(socket.username);
+        // console.log(socket.gameRoomId);
         if (gameRoomId !== undefined){
-                // let updatedOnlineUsers = rooms[gameRoomId].onlineUsers;
-                console.log(rooms)
-                // rooms[gameRoomId].onlineUsers = updatedOnlineUsers - 1;
-                // emit a disconnection event to the room
-                
-                // console.log(rooms[gameRoomId]);
-                console.log('A user disconnected');
-            }
+            // update number of online members
+            let updatedOnlineUsers = rooms[gameRoomId].onlineUsers;
+            rooms[gameRoomId].onlineUsers = updatedOnlineUsers - 1;
 
-        // socket.to(gameRoomId).emit('user-disconnected', username)
+            // delete user from room
+            delete rooms[gameRoomId].users[username];
+
+            const timeoutDelay = setTimeout(() => {
+                // delete room after timeout if room is still empty
+                clearTimeout(timeoutDelay);
+                if (!rooms[gameRoomId].users[username]){
+                    // notify the room if user is not back within 5 seconds
+                    const roomUsers = Object.entries(rooms[gameRoomId].users).map(([key, value]) => ({
+                        username: key,
+                        ...value
+                    }));
+        
+                    console.log(username + ' has left')
+                    // emit a disconnection event to the room
+                    socket.to(gameRoomId).emit('user-disconnected', username, roomUsers);
+                } 
+                
+                if (rooms[gameRoomId].onlineUsers === 0){
+                    // delete room if empty after 5 seconds
+                    console.log('deleting room')
+                    delete rooms[gameRoomId];
+                };
+
+            }, 5000);
+            
+            
+        }
+
     };
 
     return {
