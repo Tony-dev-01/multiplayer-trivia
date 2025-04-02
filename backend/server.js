@@ -47,8 +47,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
 app.use(cors({
-    origin: clientPort,
-    methods: ["GET", "POST", "PUT"],
+    origin: ["https://multiplayer-trivia.onrender.com", clientPort],
+    methods: ["GET", "POST"],
     credentials: true,
 }));
 app.use(rateLimiter);

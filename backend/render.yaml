@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: trivia-game-backend
+    env: node
+    buildCommand: cd backend && yarn install
+    startCommand: cd backend && yarn start
+    envVars:
+      - key: FRONTEND_URL
+        value: https://multiplayer-trivia-96d7c.web.app/
