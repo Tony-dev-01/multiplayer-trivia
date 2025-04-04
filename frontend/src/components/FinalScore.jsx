@@ -1,3 +1,4 @@
+import Scoreboard from "./Scoreboard";
 
 const FinalScore = () => {
     return (

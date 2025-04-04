@@ -53,6 +53,13 @@ app.use(cors({
 }));
 app.use(rateLimiter);
 
+app.get('/', (req, res) => {
+    res.status(200).json({
+        status: 200,
+        message: 'This is my endpoint.'
+    })
+})
+
 // Catch all endpoint
 app.get('*', (req, res) => {
     res.status(404).json({

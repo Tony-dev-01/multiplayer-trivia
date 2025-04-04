@@ -71,11 +71,11 @@ const Chat = ({username}) => {
         {messages.map((message, messageIndex) => {
             return (
                 <div key={messageIndex} className={`chat ${message.username !== username ? 'chat-start' : 'chat-end'} w-full`}>
-                    <div className="chat-header break-all">
+                    <div className="chat-header break-all font-medium">
                         {message.username === username ? 'Me' : message.username}
                         {/* <time className="text-xs opacity-50">2 hours ago</time> */}
                     </div>
-                    <div className={`chat-bubble break-all leading-5 text-white ${message.username !== username ? 'bg-primary' : 'bg-secondary'}`}>{message.message}</div>
+                    <div className={`chat-bubble break-all leading-5 font-normal ${message.username !== username ? 'bg-base-100 text-neutral-content' : 'bg-primary text-neutral'}`}>{message.message}</div>
                 </div>
             )
         })}
@@ -86,8 +86,8 @@ const Chat = ({username}) => {
                 {isError && <AlertMessage type="warning">{errorMessage}</AlertMessage>}
             </div>
             <div className="flex flex-row gap-3 relative">
-                <input type="text" value={userInput} placeholder="Type your message..." ref={chatbox} onChange={(e) => setUserInput(e.target.value)} className="rounded-lg px-2 w-full"/>
-                <button className="btn btn-primary rounded-lg" disabled={userInput.length === 0}>Send</button>
+                <input type="text" value={userInput} placeholder="Type your message..." ref={chatbox} onChange={(e) => setUserInput(e.target.value)} className="rounded-lg px-2 w-full font-light" />
+                <button className="btn btn-primary rounded-lg font-normal" disabled={userInput.length === 0}>Send</button>
             </div>
         </form>
         </div>

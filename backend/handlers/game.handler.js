@@ -104,159 +104,146 @@ module.exports = (io) => {
         // let request;
         // let questions;
 
-        // const fetchQuestions = async () => {
-        //   // returns 10 questions per call
-        //   request = await fetch(`https://the-trivia-api.com/v2/questions?categories=${categories}&&difficulties=${difficulties}`);
-        //   questions = await request.json();
-        // };
 
-        // if (numQuestions === 15){
-        
-        // } else if (numQuestions === 20){
-
-        // } else {
-        
-        // }
-
-        // const request = await fetch(`https://the-trivia-api.com/v2/questions?categories=${categories}&&difficulties=${difficulties}`);
-        // const questions = await request.json();
+        const request = await fetch(`https://the-trivia-api.com/v2/questions?categories=${categories}&&difficulties=${difficulties}`);
+        const questions = await request.json();
       
-        const questions = [
-            {
-                category: 'music',
-                id: '625063d7e12f6dec240bdf86',
-                correctAnswer: 'Nothing Compares 2 U',
-                incorrectAnswers: [ 'Whoomp! (There It Is)', 'Whip It', 'Bust a Move' ],
-                question: { text: "What song did Sinead O'Connor have a hit with in 1990?" },
-                tags: [ 'songs', 'one_hit_wonders', 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              },
-              {
-                category: 'music',
-                id: '622a1c397cc59eab6f950d45',
-                correctAnswer: 'Black Eyed Peas',
-                incorrectAnswers: [ 'MercyMe', 'Three 6 Mafia', 'The Velvet Underground' ],
-                question: { text: "Which band includes 'will.i.am'?" },
-                tags: [ 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              },
-              {
-                category: 'music',
-                id: '622a1c357cc59eab6f94fef9',
-                correctAnswer: 'Kylie Minogue',
-                incorrectAnswers: [ 'Madonna', 'Mika', 'Hikaru Utada' ],
-                question: { text: "Which singer released the song 'I Should Be So Lucky'?" },
-                tags: [ 'songs', 'musicians', 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              },
-              {
-                category: 'music',
-                id: '622a1c397cc59eab6f950d10',
-                correctAnswer: 'The Beatles',
-                incorrectAnswers: [ 'Deep Purple', 'Feeder', 'Uriah Heep' ],
-                question: { text: "Which English rock band released the song 'Love Me Do'?" },
-                tags: [ 'songs', 'general_knowledge', 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              },
-              {
-                category: 'music',
-                id: '622a1c397cc59eab6f950cef',
-                correctAnswer: 'Queen',
-                incorrectAnswers: [ 'Level 42', 'Deep Purple', 'Feeder' ],
-                question: {
-                  text: "Which British rock band released the song 'Bohemian Rhapsody'?"
-                },
-                tags: [ 'rock_music', 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              },
-              {
-                category: 'music',
-                id: '622a1c397cc59eab6f950d11',
-                correctAnswer: 'The Beatles',
-                incorrectAnswers: [ 'The Who', 'The Clash', 'Pink Floyd' ],
-                question: {
-                  text: "Which English rock band released the song 'Here Comes the Sun'?"
-                },
-                tags: [ 'rock_music', 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              },
-              {
-                category: 'music',
-                id: '622a1c387cc59eab6f950b86',
-                correctAnswer: 'Eagles',
-                incorrectAnswers: [ 'The Pussycat Dolls', 'Three 6 Mafia', 'The Velvet Underground' ],
-                question: {
-                  text: "Which American country rock band released the song 'Hotel California'?"
-                },
-                tags: [ 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              },
-              {
-                category: 'music',
-                id: '622a1c347cc59eab6f94fba7',
-                correctAnswer: '"I Will Survive" by Gloria Gaynor',
-                incorrectAnswers: [
-                  '"All Star" by Smash Mouth',
-                  '"Man! I Feel Like a Woman!" by Shania Twain',
-                  `"You're So Vain" by Carly Simon`
-                ],
-                question: {
-                  text: 'Which song begins with the lyrics: "At first I was afraid, I was petrified / Kept thinking I could never live without you by my side..."?'
-                },
-                tags: [ 'songs', 'lyrics', 'general_knowledge', 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              },
-              {
-                category: 'music',
-                id: '622a1c397cc59eab6f950d1e',
-                correctAnswer: 'The Beatles',
-                incorrectAnswers: [ 'Deep Purple', 'Feeder', 'Uriah Heep' ],
-                question: {
-                  text: "Which English rock band released the song 'Sgt. Pepper's Lonely Hearts Club Band'?"
-                },
-                tags: [ 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              },
-              {
-                category: 'music',
-                id: '622a1c357cc59eab6f94ff1c',
-                correctAnswer: 'Madonna',
-                incorrectAnswers: [ 'Eric Clapton', 'Nicki Minaj', 'Alanis Morissette' ],
-                question: { text: "Which American musician sung 'Like a Prayer'?" },
-                tags: [ 'general_knowledge', 'music' ],
-                type: 'text_choice',
-                difficulty: 'easy',
-                regions: [],
-                isNiche: false
-              }
-        ]
+        // const questions = [
+        //     {
+        //         category: 'music',
+        //         id: '625063d7e12f6dec240bdf86',
+        //         correctAnswer: 'Nothing Compares 2 U',
+        //         incorrectAnswers: [ 'Whoomp! (There It Is)', 'Whip It', 'Bust a Move' ],
+        //         question: { text: "What song did Sinead O'Connor have a hit with in 1990?" },
+        //         tags: [ 'songs', 'one_hit_wonders', 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       },
+        //       {
+        //         category: 'music',
+        //         id: '622a1c397cc59eab6f950d45',
+        //         correctAnswer: 'Black Eyed Peas',
+        //         incorrectAnswers: [ 'MercyMe', 'Three 6 Mafia', 'The Velvet Underground' ],
+        //         question: { text: "Which band includes 'will.i.am'?" },
+        //         tags: [ 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       },
+        //       {
+        //         category: 'music',
+        //         id: '622a1c357cc59eab6f94fef9',
+        //         correctAnswer: 'Kylie Minogue',
+        //         incorrectAnswers: [ 'Madonna', 'Mika', 'Hikaru Utada' ],
+        //         question: { text: "Which singer released the song 'I Should Be So Lucky'?" },
+        //         tags: [ 'songs', 'musicians', 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       },
+        //       {
+        //         category: 'music',
+        //         id: '622a1c397cc59eab6f950d10',
+        //         correctAnswer: 'The Beatles',
+        //         incorrectAnswers: [ 'Deep Purple', 'Feeder', 'Uriah Heep' ],
+        //         question: { text: "Which English rock band released the song 'Love Me Do'?" },
+        //         tags: [ 'songs', 'general_knowledge', 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       },
+        //       {
+        //         category: 'music',
+        //         id: '622a1c397cc59eab6f950cef',
+        //         correctAnswer: 'Queen',
+        //         incorrectAnswers: [ 'Level 42', 'Deep Purple', 'Feeder' ],
+        //         question: {
+        //           text: "Which British rock band released the song 'Bohemian Rhapsody'?"
+        //         },
+        //         tags: [ 'rock_music', 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       },
+        //       {
+        //         category: 'music',
+        //         id: '622a1c397cc59eab6f950d11',
+        //         correctAnswer: 'The Beatles',
+        //         incorrectAnswers: [ 'The Who', 'The Clash', 'Pink Floyd' ],
+        //         question: {
+        //           text: "Which English rock band released the song 'Here Comes the Sun'?"
+        //         },
+        //         tags: [ 'rock_music', 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       },
+        //       {
+        //         category: 'music',
+        //         id: '622a1c387cc59eab6f950b86',
+        //         correctAnswer: 'Eagles',
+        //         incorrectAnswers: [ 'The Pussycat Dolls', 'Three 6 Mafia', 'The Velvet Underground' ],
+        //         question: {
+        //           text: "Which American country rock band released the song 'Hotel California'?"
+        //         },
+        //         tags: [ 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       },
+        //       {
+        //         category: 'music',
+        //         id: '622a1c347cc59eab6f94fba7',
+        //         correctAnswer: '"I Will Survive" by Gloria Gaynor',
+        //         incorrectAnswers: [
+        //           '"All Star" by Smash Mouth',
+        //           '"Man! I Feel Like a Woman!" by Shania Twain',
+        //           `"You're So Vain" by Carly Simon`
+        //         ],
+        //         question: {
+        //           text: 'Which song begins with the lyrics: "At first I was afraid, I was petrified / Kept thinking I could never live without you by my side..."?'
+        //         },
+        //         tags: [ 'songs', 'lyrics', 'general_knowledge', 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       },
+        //       {
+        //         category: 'music',
+        //         id: '622a1c397cc59eab6f950d1e',
+        //         correctAnswer: 'The Beatles',
+        //         incorrectAnswers: [ 'Deep Purple', 'Feeder', 'Uriah Heep' ],
+        //         question: {
+        //           text: "Which English rock band released the song 'Sgt. Pepper's Lonely Hearts Club Band'?"
+        //         },
+        //         tags: [ 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       },
+        //       {
+        //         category: 'music',
+        //         id: '622a1c357cc59eab6f94ff1c',
+        //         correctAnswer: 'Madonna',
+        //         incorrectAnswers: [ 'Eric Clapton', 'Nicki Minaj', 'Alanis Morissette' ],
+        //         question: { text: "Which American musician sung 'Like a Prayer'?" },
+        //         tags: [ 'general_knowledge', 'music' ],
+        //         type: 'text_choice',
+        //         difficulty: 'easy',
+        //         regions: [],
+        //         isNiche: false
+        //       }
+        // ]
 
         // Store questions in DB?
 

@@ -10,6 +10,8 @@ import AlertMessage from "../../components/AlertMessage";
 import PlayerCard from "../../components/PlayerCard";
 import Game from "./Game";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
+import { FaUsers } from "react-icons/fa";
+
 
 const GameLobby = () => {
     const params = useParams();
@@ -184,13 +186,13 @@ const GameLobby = () => {
             }
 
             <div className="flex flex-col gap-4 justify-center">
-                <h1 className="text-2xl">Welcome to your game lobby, {username}.</h1>
+                <h1 className="text-2xl text-red-200">Welcome to the game, {username}.</h1>
                 <div className="flex flex-col gap-2">
                     <p>game code</p> 
                     <div className="flex gap-2 items-center p-2 bg-base-300 w-fit rounded-lg">
                     <p className="input input-md font-700 text-black bg-transparent flex justify-start items-center font-medium text-xl tracking-wider pl-2">{gameRoomId}</p>
                 <div className="lg:tooltip" data-tip={codeCopied ? "Copied!" : "Copy"}>
-                    <button className="btn" onClick={handleCopy}>{codeCopied ? <IoCheckmarkCircleOutline className="text-success" size="2em"/> : "Copy"}</button>
+                    <button className="btn w-16" onClick={handleCopy}>{codeCopied ? <IoCheckmarkCircleOutline className="text-success" size="2em"/> : "Copy"}</button>
                 </div>
                     </div>
                 </div>
@@ -201,7 +203,8 @@ const GameLobby = () => {
                     <div className="flex flex-row gap-6">
                         <div className="flex flex-col gap-4">
                         {/* Users connected to lobby */}
-                        <h2 id="list-title">Player list</h2>
+                        <h2 id="list-title" className="flex gap-2"><FaUsers /> 
+                        Players</h2>
                         <ul aria-labelledby="list-title" className="flex flex-col gap-3 max-w-48">
                             {roomUsers && roomUsers.map((user, index) => {
                                 return <PlayerCard key={user.username} user={user} isHost={index === 0} isMe={user.username === username}/>
@@ -212,18 +215,19 @@ const GameLobby = () => {
                         </div>
                         }
                         </div>
-                        {isHost &&
+                        {isHost ?
                         <form className="flex flex-col gap-4" onSubmit={handleStartGame}>
                         <div className="flex flex-row gap-4">
-                            <Dropdown name="category" id="category" onSelection={handleSelection} options={["random", "music", "sport and leisure", "film and tv", "arts and literature", "history", "society and culture", "science", "geography", "food and drink", "general knowledge"]}>Category</Dropdown>
+                            <Dropdown name="category" id="category" onSelection={handleSelection} options={["music", "sport and leisure", "film and tv", "arts and literature", "history", "society and culture", "science", "geography", "food and drink", "general knowledge"]}>Category</Dropdown>
                             <Dropdown name="difficulty" id="difficulty" onSelection={handleSelection} options={['Easy', 'Medium', 'Hard']}>Difficulty</Dropdown>
-                            {/* <Dropdown name="questions" id="questions" onSelection={handleSelection} options={['10', '15', '20', '25']}>Number of questions</Dropdown> */}
                         </div>
                         <div>
-                        <button type="submit" className="btn btn-primary">Start game</button>
+                        <button type="submit" className="btn btn-primary font-normal">Start game</button>
                         {errorMessage && <AlertMessage type='warning'>{errorMessage}</AlertMessage>}
                         </div>
                         </form>
+                        :
+                        <p className="pt-8">Waiting for host to start...</p>
                     }
                     </div>
                 </div>

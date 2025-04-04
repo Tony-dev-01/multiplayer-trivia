@@ -98,18 +98,18 @@ const Game = () => {
         if (correctAnswer === answer){
             if (selectedAnswer == correctAnswer){
                 // User got it right and this is the correct answer
-                return 'disabled:bg-green-300';
+                return 'disabled:bg-success';
             } else {
                 // user got it wrong, but this is the correct answer
-                return 'disabled:bg-blue-300';
+                return 'disabled:bg-info';
             }
         } else if (answer !== correctAnswer){
             if (answer === selectedAnswer){
                 // user selected this answer, but they were wrong
-                return 'disabled:bg-red-300';
+                return 'disabled:bg-error';
             } else {
                 // user did not select this answer and this is not the correct answer
-                return 'disabled:bg-gray-200';
+                return 'disabled:bg-base-300';
             }
         }
     }
@@ -147,32 +147,33 @@ const Game = () => {
     }
 
     return(
-        <div className="w-[80vw] h-[100vh] m-auto py-16 flex flex-col justify-center items-center">
+        <div className="w-full h-[100vh] m-auto py-16 flex flex-col justify-center items-center">
             {gameHasStarted ? 
                 displayScoreboard ?
                     <Scoreboard usersScores={usersScores} /> :
                     gameIsOver ? 
                     <FinalScore usersScores={usersScores}/>
                     :
-            <>
-            <span className="countdown font-mono text-6xl">
-            {timeUp && hasCorrectAnswer ? 'good job' : timeUp && !hasCorrectAnswer ? 'you got it wrong' : <span style={{"--value": timeRemaining}}></span>}
+            <div className="flex flex-col gap-4 justify-center items-center w-[80vw]">
+            <span className="countdown text-6xl">
+            {timeUp && hasCorrectAnswer ? 'Good job!' : timeUp && !hasCorrectAnswer ? 'Wrong answer.' : <span style={{"--value": timeRemaining}}></span>}
             </span>
             
-            <form className="flex flex-col gap-4 w-full h-full" onClick={handleAnswer}>
-            <h2 className="text-2xl font-bold">{currentQuestion.question.text}</h2>
+            <form className="flex flex-col gap-6 w-full h-full" onClick={handleAnswer}>
+            <h2 className="text-2xl font-semi">{currentQuestion.question.text}</h2>
+            <div className="flex flex-col gap-4 w-full h-full">
             <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-4 gap-4">
-                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary ${selectedAnswer === currentQuestion.answers[0] && !timeUp ? 'disabled:bg-secondary' : !timeUp ? 'disabled:bg-gray-400' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[0])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[0]}>{currentQuestion.answers[0]}</button>
-                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary  ${selectedAnswer === currentQuestion.answers[1] && !timeUp ? 'disabled:bg-secondary' : !timeUp ? 'disabled:bg-gray-400' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[1])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[1]}>{currentQuestion.answers[1]}</button>
+                <button type="button" className={`h-32 rounded-lg bg-secondary text-neutral flex justify-center items-center px-6 hover:bg-primary ${selectedAnswer === currentQuestion.answers[0] && !timeUp ? 'disabled:bg-primary' : !timeUp ? 'disabled:bg-base-300' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[0])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[0]}>{currentQuestion.answers[0]}</button>
+                <button type="button" className={`h-32 rounded-lg bg-secondary text-neutral flex justify-center items-center px-6 hover:bg-primary  ${selectedAnswer === currentQuestion.answers[1] && !timeUp ? 'disabled:bg-primary' : !timeUp ? 'disabled:bg-base-300' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[1])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[1]}>{currentQuestion.answers[1]}</button>
             </div>
     
             <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-4 gap-4">
-                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary ${selectedAnswer === currentQuestion.answers[2] && !timeUp ? 'disabled:bg-secondary' : !timeUp ? 'disabled:bg-gray-400' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[2])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[2]}>{currentQuestion.answers[2]}</button>
-                <button type="button" className={`h-32 rounded-lg bg-secondary text-black flex justify-center items-center hover:bg-primary  ${selectedAnswer === currentQuestion.answers[3] && !timeUp ? 'disabled:bg-secondary' : !timeUp ? 'disabled:bg-gray-400' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[3])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[3]}>{currentQuestion.answers[3]}</button>
+                <button type="button" className={`h-32 rounded-lg bg-secondary text-neutral flex justify-center items-center px-6 hover:bg-primary ${selectedAnswer === currentQuestion.answers[2] && !timeUp ? 'disabled:bg-primary' : !timeUp ? 'disabled:bg-base-300' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[2])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[2]}>{currentQuestion.answers[2]}</button>
+                <button type="button" className={`h-32 rounded-lg bg-secondary text-neutral flex justify-center items-center px-6 hover:bg-primary  ${selectedAnswer === currentQuestion.answers[3] && !timeUp ? 'disabled:bg-primary' : !timeUp ? 'disabled:bg-base-300' : ''} ${timeUp && highlightAnswers(currentQuestion.answers[3])}`} disabled={timeUp || hasAnswered} value={currentQuestion.answers[3]}>{currentQuestion.answers[3]}</button>
             </div>
-    
+            </div>
             </form>
-            </>
+            </div>
             : 
             <p>Waiting for game to start...</p>
             }

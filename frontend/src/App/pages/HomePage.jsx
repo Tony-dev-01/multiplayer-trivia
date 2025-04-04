@@ -8,7 +8,7 @@ const HomePage = () => {
         socket.connect();
 
         socket.on("connect", () => {
-            console.log('we are connected')
+            // console.log('we are connected')
         });
 
         return () => {

@@ -21,8 +21,8 @@ const Dropdown = ({children, options, onSelection, ...props}) => {
         <div className="flex flex-col gap-1">
         <label htmlFor={props.id}>{children}</label>
         
-        <select onChange={(e) => onSelection(e)} {...props}>
-            <option selected="selected">-</option>
+        <select onChange={(e) => onSelection(e)} {...props} className="select" defaultValue="-">
+            <option disabled={true}>-</option>
             {options.map((option) => {
                 return <option value={option}>{option}</option>
             })}

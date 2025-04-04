@@ -2,10 +2,9 @@ import { FaTimesCircle } from "react-icons/fa";
 
 
 const Toast = ({toast, onClose}) => {
-    console.log(toast)
     const {event, username} = toast;
     return(
-    <div role="alert" className="rounded-xl border border-gray-100 p-4 toast toast-end bg-neutral-content z-40">
+    <div role="alert" className="rounded-xl border border-neutral p-4 toast toast-end bg-neutral-content z-40">
     <div className="flex items-start gap-4">
         <span className="text-success">
         {event === 'connect' ? <svg
@@ -26,12 +25,12 @@ const Toast = ({toast, onClose}) => {
         </span>
     
         <div className="flex-1">
-        <strong className="block font-medium text-gray-900"> {event === 'connect' ? `User joined`: `User left`} </strong>
+        <strong className="block font-medium text-base-100"> {event === 'connect' ? `User joined`: `User left`} </strong>
     
-        <p className="mt-1 text-sm text-gray-700">{event === 'connect' ? `${username} is connected` : `${username} has disconnected.`}</p>
+        <p className="mt-1 text-sm text-base-100">{event === 'connect' ? `${username} is connected` : `${username} has disconnected.`}</p>
         </div>
     
-        <button className="text-gray-500 transition hover:text-gray-600" onClick={onClose}>
+        <button className="text-neutral" onClick={onClose}>
         <span className="sr-only">Dismiss popup</span>
     
         <svg
