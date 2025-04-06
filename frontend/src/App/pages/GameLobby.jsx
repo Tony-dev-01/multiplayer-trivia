@@ -10,7 +10,8 @@ import AlertMessage from "../../components/AlertMessage";
 import PlayerCard from "../../components/PlayerCard";
 import Game from "./Game";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
-import { FaUsers } from "react-icons/fa";
+import { FaUsers, FaComments } from "react-icons/fa";
+
 
 
 const GameLobby = () => {
@@ -175,7 +176,7 @@ const GameLobby = () => {
     }, [isConnected])
 
     return(
-        <div className="w-full h-full flex justify-center"> 
+        <div className="w-full h-full flex justify-center py-12"> 
         <div className="container p-6 flex flex-col gap-6">
         <UsernameForm handleSubmit={onUsernameSelection} open={!isConnected} />
         {isConnected && usernameSelected && !gameHasStarted ?
@@ -189,19 +190,20 @@ const GameLobby = () => {
                 <h1 className="text-2xl text-red-200">Welcome to the game, {username}.</h1>
                 <div className="flex flex-col gap-2">
                     <p>game code</p> 
+                    
                     <div className="flex gap-2 items-center p-2 bg-base-300 w-fit rounded-lg">
                     <p className="input input-md font-700 text-black bg-transparent flex justify-start items-center font-medium text-xl tracking-wider pl-2">{gameRoomId}</p>
                 <div className="lg:tooltip" data-tip={codeCopied ? "Copied!" : "Copy"}>
                     <button className="btn w-16" onClick={handleCopy}>{codeCopied ? <IoCheckmarkCircleOutline className="text-success" size="2em"/> : "Copy"}</button>
                 </div>
-                    </div>
                 </div>
+            </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8 h-full">
-                <div className="h-full rounded-lg  lg:col-span-2 p-6 bg-base-200">
-                    <div className="flex flex-row gap-6">
-                        <div className="flex flex-col gap-4">
+                <div className="h-auto rounded-lg  lg:col-span-2 p-6 bg-base-200">
+                    <div className="flex flex-row gap-6 flex-wrap w-full flex-auto">
+                        <div className="flex flex-col gap-4 flex-wrap ">
                         {/* Users connected to lobby */}
                         <h2 id="list-title" className="flex gap-2"><FaUsers /> 
                         Players</h2>
@@ -216,8 +218,8 @@ const GameLobby = () => {
                         }
                         </div>
                         {isHost ?
-                        <form className="flex flex-col gap-4" onSubmit={handleStartGame}>
-                        <div className="flex flex-row gap-4">
+                        <form className="flex flex-col gap-4 w-full flex-1" onSubmit={handleStartGame}>
+                        <div className="flex flex-row gap-4 flex-wrap w-full">
                             <Dropdown name="category" id="category" onSelection={handleSelection} options={["music", "sport and leisure", "film and tv", "arts and literature", "history", "society and culture", "science", "geography", "food and drink", "general knowledge"]}>Category</Dropdown>
                             <Dropdown name="difficulty" id="difficulty" onSelection={handleSelection} options={['Easy', 'Medium', 'Hard']}>Difficulty</Dropdown>
                         </div>
@@ -231,9 +233,17 @@ const GameLobby = () => {
                     }
                     </div>
                 </div>
-                <div className="h-full rounded-lg  lg:col-span-1 p-6 bg-base-200">
+            <div className="h-auto rounded-lg  lg:col-span-1 p-6 bg-base-200">
+                <div className="collapse collapse-arrow border border-base-300 bg-base-300">
                     {/* Chat display here */}
-                    <Chat username={username} />
+                    <input type="checkbox" name="my-accordion-2" defaultChecked />
+                    <div className="collapse-title flex items-center gap-4">
+                    <FaComments /> Chat
+                    </div>
+                    <div className="collapse-content">
+                        <Chat username={username} />
+                    </div>
+                </div>
                 </div>
             </div>
             </> :

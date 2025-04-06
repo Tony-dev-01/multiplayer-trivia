@@ -77,11 +77,10 @@ const Game = () => {
             setUsersScores({scores, questionsRemaining});
             setTimeRemaining(questionTimer);
             setDisplayScoreboard(() => true);
-            console.log('displaying scoreboard')
         });
 
         socket.on('game-over', (finalScores, questionsRemaining) => {
-            setUsersScores(finalScores, questionsRemaining);
+            setUsersScores({scores: finalScores, questionsRemaining})
             setGameIsOver(true);
             console.log('display final score');
         })
@@ -147,12 +146,12 @@ const Game = () => {
     }
 
     return(
-        <div className="w-full h-[100vh] m-auto py-16 flex flex-col justify-center items-center">
+        <div className="w-full h-[100vh] m-auto flex flex-col justify-center items-center">
             {gameHasStarted ? 
                 displayScoreboard ?
                     <Scoreboard usersScores={usersScores} /> :
                     gameIsOver ? 
-                    <FinalScore usersScores={usersScores}/>
+                    <FinalScore usersScores={usersScores} gameRoomId={gameRoomId}/>
                     :
             <div className="flex flex-col gap-4 justify-center items-center w-[80vw]">
             <span className="countdown text-6xl">

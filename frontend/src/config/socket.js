@@ -5,7 +5,7 @@ const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhos
 
 // change to http://localhost:4000 for development
 // https://multiplayer-trivia.onrender.com for backend
-export const socket = io('http://localhost:4000', {
+export const socket = io('https://multiplayer-trivia.onrender.com', {
     autoConnect: false,
     rejectUnauthorized: false,
     transports: ["websocket", "polling"],
